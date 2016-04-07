@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -55,46 +56,17 @@ public class Wheel extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    public static View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
-
-
     private static Bitmap imageOriginal, imageScaled;
     private static Matrix matrix;
 
     private ImageView dialer;
     private int dialerHeight, dialerWidth;
+
+    private GestureDetector detector;
+
+    // needed for detecting the inversed rotations
+    private boolean[] quadrantTouched;
+    private boolean allowRotating;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,7 +75,7 @@ public class Wheel extends AppCompatActivity {
 
         // load the image only once
         if (imageOriginal == null) {
-            imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.graphic_ring);
+            imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.fork);
         }
 
         // initialize the matrix only once
@@ -114,6 +86,13 @@ public class Wheel extends AppCompatActivity {
             matrix.reset();
         }
 
+
+        detector = new GestureDetector(this, new MyGestureDetector());
+
+        // there is no 0th quadrant, to keep it simple the first value gets ignored
+        quadrantTouched = new boolean[] { false, false, false, false, false };
+
+        allowRotating = true;
 
         dialer = (ImageView) findViewById(R.id.imageView_ring);
         dialer.setOnTouchListener(new MyOnTouchListener());
@@ -128,26 +107,31 @@ public class Wheel extends AppCompatActivity {
 
                     // resize
                     Matrix resize = new Matrix();
-                    resize.postScale((float) Math.min(dialerWidth, dialerHeight) / (float) imageOriginal.getWidth(), (float) Math.min(dialerWidth, dialerHeight) / (float) imageOriginal.getHeight());
+                    resize.postScale((float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getWidth(), (float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getHeight());
                     imageScaled = Bitmap.createBitmap(imageOriginal, 0, 0, imageOriginal.getWidth(), imageOriginal.getHeight(), resize, false);
+
+                    // translate to the image view's center
+                    float translateX = dialerWidth / 2 - imageScaled.getWidth() / 2;
+                    float translateY = dialerHeight / 2 - imageScaled.getHeight() / 2;
+                    matrix.postTranslate(translateX, translateY);
+
+                    dialer.setImageBitmap(imageScaled);
+                    dialer.setImageMatrix(matrix);
                 }
             }
         });
 
     }
-
+    /**
+     * Simple implementation of an {@link View.OnTouchListener} for registering the dialer's touch events.
+     */
     private class MyOnTouchListener implements View.OnTouchListener {
-
         private double startAngle;
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
 
             switch (event.getAction()) {
-
-                case MotionEvent.ACTION_DOWN:
-                    startAngle = getAngle(event.getX(), event.getY());
-                    break;
 
                 case MotionEvent.ACTION_MOVE:
                     double currentAngle = getAngle(event.getX(), event.getY());
@@ -156,15 +140,76 @@ public class Wheel extends AppCompatActivity {
                     break;
 
                 case MotionEvent.ACTION_UP:
-
+                    allowRotating = true;
                     break;
             }
+
+            // set the touched quadrant to true
+            quadrantTouched[getQuadrant(event.getX() - (dialerWidth / 2), dialerHeight - event.getY() - (dialerHeight / 2))] = true;
+
+            detector.onTouchEvent(event);
 
             return true;
         }
 
     }
 
+    /**
+     * Simple implementation of a {@link GestureDetector.SimpleOnGestureListener} for detecting a fling event.
+     */
+    private class MyGestureDetector extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+            // get the quadrant of the start and the end of the fling
+            int q1 = getQuadrant(e1.getX() - (dialerWidth / 2), dialerHeight - e1.getY() - (dialerHeight / 2));
+            int q2 = getQuadrant(e2.getX() - (dialerWidth / 2), dialerHeight - e2.getY() - (dialerHeight / 2));
+
+            // the inversed rotations
+            if ((q1 == 2 && q2 == 2 && Math.abs(velocityX) < Math.abs(velocityY))
+                    || (q1 == 3 && q2 == 3)
+                    || (q1 == 1 && q2 == 3)
+                    || (q1 == 4 && q2 == 4 && Math.abs(velocityX) > Math.abs(velocityY))
+                    || ((q1 == 2 && q2 == 3) || (q1 == 3 && q2 == 2))
+                    || ((q1 == 3 && q2 == 4) || (q1 == 4 && q2 == 3))
+                    || (q1 == 2 && q2 == 4 && quadrantTouched[3])
+                    || (q1 == 4 && q2 == 2 && quadrantTouched[3])) {
+
+                dialer.post(new FlingRunnable(-1 * (velocityX + velocityY)));
+            } else {
+                // the normal rotation
+                dialer.post(new FlingRunnable(velocityX + velocityY));
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * A {@link Runnable} for animating the the dialer's fling.
+     */
+    private class FlingRunnable implements Runnable {
+
+        private float velocity;
+
+        public FlingRunnable(float velocity) {
+            this.velocity = velocity;
+        }
+
+        @Override
+        public void run() {
+            if (Math.abs(velocity) > 5 && allowRotating) {
+                rotateDialer(velocity / 75);
+                velocity /= 1.0666F;
+
+                // post this instance again
+                dialer.post(this);
+            }
+        }
+    }
+    /**
+     * @return The angle of the unit circle with the image view's center
+     */
     private double getAngle(double xTouch, double yTouch) {
         double x = xTouch - (dialerWidth / 2d);
         double y = dialerHeight - yTouch - (dialerHeight / 2d);
@@ -194,61 +239,14 @@ public class Wheel extends AppCompatActivity {
         }
     }
 
-    private void rotateDialer(float degrees) {
-        matrix.postRotate(degrees);
-        dialer.setImageBitmap(Bitmap.createBitmap(imageScaled, 0, 0, imageScaled.getWidth(), imageScaled.getHeight(), matrix, true));
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
-    }
-
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
-        }
-    }
-
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
-
     /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
+     * Rotate the dialer.
+     *
+     * @param degrees The degrees, the dialer should get rotated.
      */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    private void rotateDialer(float degrees) {
+        matrix.postRotate(degrees, dialerWidth / 2, dialerHeight / 2);
+
+        dialer.setImageMatrix(matrix);
     }
 }
