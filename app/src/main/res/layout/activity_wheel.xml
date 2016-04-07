@@ -1,17 +1,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:background="#FF0000"
     tools:context="cheesewheel.cheesewheel.Wheel">
 
     <ImageView
         android:id="@+id/inside_imageview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_marginTop="5dip"
+        android:layout_width="500dp"
+        android:layout_height="match_parent"
         android:src="@drawable/cheese"
-        android:layout_alignParentBottom="true" />
+        android:scaleType="center"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
 
     <ImageView
         android:id="@+id/imageView_ring"
