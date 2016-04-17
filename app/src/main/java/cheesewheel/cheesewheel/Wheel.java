@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -11,14 +12,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.ImageView;
-//import cheesewheel.cheesewheel.R;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
 public class Wheel extends AppCompatActivity {
+
+    private static final String CONSUMER_KEY = "Jcxok9clExtwJHQ6sH_t_g";
+    private static final String CONSUMER_SECRET = "1kcL0AbqGnB-u-qlUbrZnrlRheM";
+    private static final String TOKEN = "DibVSEEczXLy45xUKbvd_q6VgCgymp2p";
+    private static final String TOKEN_SECRET = "eYbmcqVaqT-OxpVraCX0sbHSKkM";
+
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -96,14 +103,27 @@ public class Wheel extends AppCompatActivity {
     private ImageView dialer;
     private int dialerHeight, dialerWidth;
 
+    private Button getRestaurantsButton;
+    private String foodType;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wheel);
+        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
+        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getRestaurant();
+                finish();
+            }
+        });
+
+
 
         // load the image only once
         if (imageOriginal == null) {
-            imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.graphic_ring);
+            imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
         }
 
         // initialize the matrix only once
@@ -135,6 +155,19 @@ public class Wheel extends AppCompatActivity {
         });
 
     }
+
+    private void getRestaurant() {
+        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
+        YelpAPI yelp = new YelpAPI(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
+        // TODO change into actual variables to be passed in, determined by GPS data and time of day
+        String response = yelp.search("dinner", 29, 89);
+
+        // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
+
+        
+    }
+
+
 
     private class MyOnTouchListener implements View.OnTouchListener {
 
