@@ -103,7 +103,7 @@ public class Wheel extends AppCompatActivity {
 
         // load the image only once
         if (imageOriginal == null) {
-            imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.graphic_ring);
+            imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
         }
 
         // initialize the matrix only once
