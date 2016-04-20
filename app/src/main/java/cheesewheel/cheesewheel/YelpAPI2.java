@@ -1,13 +1,11 @@
 package cheesewheel.cheesewheel;
-
-import org.scribe.builder.api.DefaultApi10a;
 import org.scribe.model.Token;
+import org.scribe.builder.api.DefaultApi10a;
 
 /**
- * Generic service provider for two-step OAuth10a.
+ * Created by xflyter on 4/20/16.
  */
-public class TwoStepOAuth extends DefaultApi10a {
-
+public class YelpAPI2 extends DefaultApi10a{
     @Override
     public String getAccessTokenEndpoint() {
         return null;
