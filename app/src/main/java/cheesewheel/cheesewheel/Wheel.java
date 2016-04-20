@@ -45,8 +45,9 @@ public class Wheel extends AppCompatActivity {
             // Delayed removal of status and navigation bar
 
             // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
+            // and API 19 (KitKat). It is safe to use them, as tshey are inlined
             // at compile-time and do nothing on earlier devices.
+            mContentView = findViewById(R.id.inside_imageview);
             mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
