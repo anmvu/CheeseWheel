@@ -25,6 +25,7 @@ public class Wheel extends AppCompatActivity {
     private static final String CONSUMER_SECRET = "1kcL0AbqGnB-u-qlUbrZnrlRheM";
     private static final String TOKEN = "DibVSEEczXLy45xUKbvd_q6VgCgymp2p";
     private static final String TOKEN_SECRET = "eYbmcqVaqT-OxpVraCX0sbHSKkM";
+    private static final String IP_ADDRESS = "172.16.21.188";
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -119,8 +120,6 @@ public class Wheel extends AppCompatActivity {
             }
         });
 
-
-
         // load the image only once
         if (imageOriginal == null) {
             imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
@@ -133,7 +132,6 @@ public class Wheel extends AppCompatActivity {
             // not needed, you can also post the matrix immediately to restore the old state
             matrix.reset();
         }
-
 
         dialer = (ImageView) findViewById(R.id.imageView_ring);
         dialer.setOnTouchListener(new MyOnTouchListener());
@@ -164,9 +162,8 @@ public class Wheel extends AppCompatActivity {
 
         // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
 
-        
-    }
 
+    }
 
 
     private class MyOnTouchListener implements View.OnTouchListener {
