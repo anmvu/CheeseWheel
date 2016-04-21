@@ -2,20 +2,19 @@ package cheesewheel.cheesewheel;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.gesture.Gesture;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.view.GestureDetector;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -51,9 +50,8 @@ public class Wheel extends AppCompatActivity {
             // Delayed removal of status and navigation bar
 
             // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as tshey are inlined
+            // and API 19 (KitKat). It is safe to use them, as they are inlined
             // at compile-time and do nothing on earlier devices.
-            mContentView = findViewById(R.id.inside_imageview);
             mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -72,8 +70,8 @@ public class Wheel extends AppCompatActivity {
     private Button getRestaurantsButton;
     private String foodType;
 
-    APIStaticInformation apiKeys = new APIStaticInformation();
-    Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
+//    APIStaticInformation apiKeys = new APIStaticInformation();
+//    Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
 
     private GestureDetector detector;
     private boolean[] quadrantTouched;
@@ -85,24 +83,13 @@ public class Wheel extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wheel);
-<<<<<<< HEAD
 //        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
 //        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
 //                getRestaurant();
-//                finish();
 //            }
 //        });
-=======
-        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
-        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getRestaurant();
-            }
-        });
->>>>>>> nick
 
         // load the image only once
         if (imageOriginal == null) {
@@ -148,28 +135,15 @@ public class Wheel extends AppCompatActivity {
 
     }
 
-<<<<<<< HEAD
 //    private void getRestaurant() {
 //        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
-//        YelpAPI yelp = new YelpAPI(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
 //        // TODO change into actual variables to be passed in, determined by GPS data and time of day
-//        String response = yelp.search("dinner", 29, 89);
-//
+//        YelpParser yelpParser = new YelpParser();
+//        String response = yelp.search("chinese", 30.361471, -87.164326);
 //        // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
-//
+//        // TODO Just send the entire JSON from Yelp to server
 //
 //    }
-=======
-    private void getRestaurant() {
-        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
-        // TODO change into actual variables to be passed in, determined by GPS data and time of day
-        YelpParser yelpParser = new YelpParser();
-        String response = yelp.search("chinese", 30.361471, -87.164326);
-        // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
-        // TODO Just send the entire JSON from Yelp to server
-
-    }
->>>>>>> nick
 
     private class MyOnTouchListener implements View.OnTouchListener {
 
