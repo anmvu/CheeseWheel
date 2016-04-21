@@ -1,20 +1,26 @@
 package cheesewheel.cheesewheel;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -23,6 +29,16 @@ import android.widget.ImageView;
 public class Wheel extends AppCompatActivity {
 
     private static final String IP_ADDRESS = "172.16.21.188";
+
+    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean"};
+
+    private static Random rand = new Random();
+
+    private static Map<String,Integer> choices = new HashMap<String,Integer>();
+
+    private static ArrayList<String> alreadyPlaced = new ArrayList<String>();
+
+    private static ArrayList<String> rejected = new ArrayList<String>();
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -77,7 +93,22 @@ public class Wheel extends AppCompatActivity {
     private boolean[] quadrantTouched;
     private boolean allowRotating;
 
-    Async backgroundTasks = new Async();
+//    Async backgroundTasks = new Async();
+
+
+    public void getChoices(){
+        int angle = 0;
+        int amount = 8;
+        int left = cuisines.length - alreadyPlaced.size()-rejected.size();
+        if (left < amount ) amount = left;
+        for (int i = 0; i < amount; i++){
+            int index = rand.nextInt(cuisines.length);
+            while(alreadyPlaced.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
+            alreadyPlaced.add(cuisines[index]);
+            choices.put(cuisines[index],angle);
+            angle += (360/amount);
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,7 +153,7 @@ public class Wheel extends AppCompatActivity {
 
                     // resize
                     Matrix resize = new Matrix();
-                    resize.postScale((float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getWidth(), (float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getHeight());
+                    resize.postScale((float) Math.min(dialerWidth, dialerHeight) / (float) imageOriginal.getWidth(), (float) Math.min(dialerWidth, dialerHeight) / (float) imageOriginal.getHeight());
                     imageScaled = Bitmap.createBitmap(imageOriginal, 0, 0, imageOriginal.getWidth(), imageOriginal.getHeight(), resize, false);
                     float translateX = dialerWidth / 2 - imageScaled.getWidth() / 2;
                     float translateY = dialerHeight / 2 - imageScaled.getHeight() / 2;
@@ -132,6 +163,19 @@ public class Wheel extends AppCompatActivity {
                 }
             }
         });
+        getChoices();
+        RelativeLayout myLayout = (RelativeLayout) findViewById(R.id.screen);
+
+        for (int i= 0; i < alreadyPlaced.size(); i++) {
+            TextView text = new TextView(this);
+            text.setText(alreadyPlaced.get(i));
+            text.setLayoutParams(new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT));
+            text.setGravity(Gravity.CENTER);
+            myLayout.addView(text);
+        }
+
 
     }
 
@@ -174,6 +218,8 @@ public class Wheel extends AppCompatActivity {
 
             return true;
         }
+
+
 
     }
 
@@ -245,47 +291,8 @@ public class Wheel extends AppCompatActivity {
     }
 
     private void rotateDialer(float degrees) {
-        matrix.postRotate(degrees, dialerWidth/2, dialerHeight/2);
+        matrix.postRotate(degrees, dialerWidth / 2, dialerHeight / 2);
         dialer.setImageMatrix(matrix);
-    }
-
-    public class Async extends Activity {
-        @Override
-        protected  void onCreate(Bundle savedInstance) {
-            super.onCreate(savedInstance);
-        }
-
-        @Override
-        protected  void onResume() {
-            super.onResume();
-            new AsyncCaller().execute();
-        }
-    }
-
-    private class AsyncCaller extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected  void onPreExecute() {
-            super.onPreExecute();
-
-
-        }
-
-        @Override
-        protected Void doInBackground(Void...params) {
-
-            //this method will be running on background thread so don't update UI frome here
-            //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-
-            //this method will be running on UI thread
-
-        }
     }
 
 }
