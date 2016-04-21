@@ -1,18 +1,21 @@
 package cheesewheel.cheesewheel;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.gesture.Gesture;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.view.GestureDetector;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -20,10 +23,6 @@ import android.widget.ImageView;
  */
 public class Wheel extends AppCompatActivity {
 
-    private static final String CONSUMER_KEY = "Jcxok9clExtwJHQ6sH_t_g";
-    private static final String CONSUMER_SECRET = "1kcL0AbqGnB-u-qlUbrZnrlRheM";
-    private static final String TOKEN = "DibVSEEczXLy45xUKbvd_q6VgCgymp2p";
-    private static final String TOKEN_SECRET = "eYbmcqVaqT-OxpVraCX0sbHSKkM";
     private static final String IP_ADDRESS = "172.16.21.188";
 
     /**
@@ -63,40 +62,6 @@ public class Wheel extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
-
 
     private static Bitmap imageOriginal, imageScaled;
     private static Matrix matrix;
@@ -107,10 +72,20 @@ public class Wheel extends AppCompatActivity {
     private Button getRestaurantsButton;
     private String foodType;
 
+    APIStaticInformation apiKeys = new APIStaticInformation();
+    Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
+
+    private GestureDetector detector;
+    private boolean[] quadrantTouched;
+    private boolean allowRotating;
+
+    Async backgroundTasks = new Async();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wheel);
+<<<<<<< HEAD
 //        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
 //        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -119,11 +94,25 @@ public class Wheel extends AppCompatActivity {
 //                finish();
 //            }
 //        });
+=======
+        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
+        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getRestaurant();
+            }
+        });
+>>>>>>> nick
 
         // load the image only once
         if (imageOriginal == null) {
             imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.fork);
         }
+
+        detector = new GestureDetector(this, new MyGestureDetector());
+
+        quadrantTouched = new boolean[] {false, false, false, false, false};
+        allowRotating = true;
 
         // initialize the matrix only once
         if (matrix == null) {
@@ -146,14 +135,20 @@ public class Wheel extends AppCompatActivity {
 
                     // resize
                     Matrix resize = new Matrix();
-                    resize.postScale((float) Math.min(dialerWidth, dialerHeight) / (float) imageOriginal.getWidth(), (float) Math.min(dialerWidth, dialerHeight) / (float) imageOriginal.getHeight());
+                    resize.postScale((float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getWidth(), (float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getHeight());
                     imageScaled = Bitmap.createBitmap(imageOriginal, 0, 0, imageOriginal.getWidth(), imageOriginal.getHeight(), resize, false);
+                    float translateX = dialerWidth / 2 - imageScaled.getWidth() / 2;
+                    float translateY = dialerHeight / 2 - imageScaled.getHeight() / 2;
+                    matrix.postTranslate(translateX, translateY);
+                    dialer.setImageBitmap(imageScaled);
+                    dialer.setImageMatrix(matrix);
                 }
             }
         });
 
     }
 
+<<<<<<< HEAD
 //    private void getRestaurant() {
 //        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
 //        YelpAPI yelp = new YelpAPI(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
@@ -164,7 +159,17 @@ public class Wheel extends AppCompatActivity {
 //
 //
 //    }
+=======
+    private void getRestaurant() {
+        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
+        // TODO change into actual variables to be passed in, determined by GPS data and time of day
+        YelpParser yelpParser = new YelpParser();
+        String response = yelp.search("chinese", 30.361471, -87.164326);
+        // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
+        // TODO Just send the entire JSON from Yelp to server
 
+    }
+>>>>>>> nick
 
     private class MyOnTouchListener implements View.OnTouchListener {
 
@@ -186,13 +191,54 @@ public class Wheel extends AppCompatActivity {
                     break;
 
                 case MotionEvent.ACTION_UP:
-
+                    allowRotating = true;
                     break;
             }
+
+            quadrantTouched[getQuadrant(event.getX() - (dialerWidth / 2), dialerHeight - event.getY() - (dialerHeight / 2))] = true;
+            detector.onTouchEvent(event);
 
             return true;
         }
 
+    }
+
+    private class MyGestureDetector extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            int q1 = getQuadrant(e1.getX() - (dialerWidth / 2), dialerHeight - e1.getY() - (dialerHeight / 2));
+            int q2 = getQuadrant(e2.getX() - (dialerWidth / 2), dialerHeight - e2.getY() - (dialerHeight / 2));
+
+            if ((q1 == 2 && q2 == 2 && Math.abs(velocityX) < Math.abs(velocityY))
+                    || (q1 == 3 && q2 == 3)
+                    || (q1 == 1 && q2 == 3)
+                    || (q1 == 4 && q2 == 4 && Math.abs(velocityX) > Math.abs(velocityY))
+                    || ((q1 == 2 && q2 == 3) || (q1 == 3 && q2 == 2))
+                    || ((q1 == 3 && q2 == 4) || (q1 == 4 && q2 == 3))
+                    || (q1 == 2 && q2 == 4 && quadrantTouched[3])
+                    || (q1 == 4 && q2 == 2 && quadrantTouched[3])) {
+                dialer.post(new FlingRunnable(-1 * (velocityX + velocityY)));
+            } else {
+                dialer.post(new FlingRunnable(velocityX + velocityY));
+            }
+            return true;
+        }
+    }
+
+    private class FlingRunnable implements Runnable {
+        private float velocity;
+        public FlingRunnable(float velocity) {
+            this.velocity = velocity;
+        }
+
+        @Override
+        public void run() {
+            if (Math.abs(velocity) > 5 && allowRotating) {
+                rotateDialer(velocity / 75);
+                velocity /= 1.0666F;
+                dialer.post(this);
+            }
+        }
     }
 
     private double getAngle(double xTouch, double yTouch) {
@@ -225,60 +271,47 @@ public class Wheel extends AppCompatActivity {
     }
 
     private void rotateDialer(float degrees) {
-        matrix.postRotate(degrees);
-        dialer.setImageBitmap(Bitmap.createBitmap(imageScaled, 0, 0, imageScaled.getWidth(), imageScaled.getHeight(), matrix, true));
+        matrix.postRotate(degrees, dialerWidth/2, dialerHeight/2);
+        dialer.setImageMatrix(matrix);
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
+    public class Async extends Activity {
+        @Override
+        protected  void onCreate(Bundle savedInstance) {
+            super.onCreate(savedInstance);
+        }
 
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
-    }
-
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
+        @Override
+        protected  void onResume() {
+            super.onResume();
+            new AsyncCaller().execute();
         }
     }
 
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
+    private class AsyncCaller extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected  void onPreExecute() {
+            super.onPreExecute();
+
+
         }
-        //mControlsView.setVisibility(View.GONE);
-        mVisible = false;
 
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+        @Override
+        protected Void doInBackground(Void...params) {
+
+            //this method will be running on background thread so don't update UI frome here
+            //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            //this method will be running on UI thread
+
+        }
     }
 
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
-    }
 }
