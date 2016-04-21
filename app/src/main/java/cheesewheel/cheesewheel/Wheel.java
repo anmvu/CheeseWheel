@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -112,18 +111,18 @@ public class Wheel extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wheel);
-        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
-        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getRestaurant();
-                finish();
-            }
-        });
+//        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
+//        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                getRestaurant();
+//                finish();
+//            }
+//        });
 
         // load the image only once
         if (imageOriginal == null) {
-            imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
+            imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.fork);
         }
 
         // initialize the matrix only once
@@ -155,16 +154,16 @@ public class Wheel extends AppCompatActivity {
 
     }
 
-    private void getRestaurant() {
-        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
-        YelpAPI yelp = new YelpAPI(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
-        // TODO change into actual variables to be passed in, determined by GPS data and time of day
-        String response = yelp.search("dinner", 29, 89);
-
-        // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
-
-
-    }
+//    private void getRestaurant() {
+//        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
+//        YelpAPI yelp = new YelpAPI(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
+//        // TODO change into actual variables to be passed in, determined by GPS data and time of day
+//        String response = yelp.search("dinner", 29, 89);
+//
+//        // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
+//
+//
+//    }
 
 
     private class MyOnTouchListener implements View.OnTouchListener {
