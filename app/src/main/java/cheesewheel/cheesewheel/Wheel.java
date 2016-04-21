@@ -1,6 +1,8 @@
 package cheesewheel.cheesewheel;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.gesture.Gesture;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,7 +10,6 @@ import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -78,11 +79,12 @@ public class Wheel extends AppCompatActivity {
     private boolean[] quadrantTouched;
     private boolean allowRotating;
 
+    Async backgroundTasks = new Async();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wheel);
-        //mContentView = getLayoutInflater().inflate(R.layout.activity_wheel, null);
         this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
         this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -248,4 +250,44 @@ public class Wheel extends AppCompatActivity {
         matrix.postRotate(degrees, dialerWidth/2, dialerHeight/2);
         dialer.setImageMatrix(matrix);
     }
+
+    public class Async extends Activity {
+        @Override
+        protected  void onCreate(Bundle savedInstance) {
+            super.onCreate(savedInstance);
+        }
+
+        @Override
+        protected  void onResume() {
+            super.onResume();
+            new AsyncCaller().execute();
+        }
+    }
+
+    private class AsyncCaller extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected  void onPreExecute() {
+            super.onPreExecute();
+
+
+        }
+
+        @Override
+        protected Void doInBackground(Void...params) {
+
+            //this method will be running on background thread so don't update UI frome here
+            //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            //this method will be running on UI thread
+
+        }
+    }
+
 }
