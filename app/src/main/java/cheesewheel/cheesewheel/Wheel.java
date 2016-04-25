@@ -7,11 +7,16 @@ import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -34,7 +39,7 @@ public class Wheel extends AppCompatActivity {
 
     private static Random rand = new Random();
 
-    private static Map<String,Integer> choices = new HashMap<String,Integer>();
+    private static Map<String,Float> choices = new HashMap<String,Float>();
 
     private static ArrayList<String> alreadyPlaced = new ArrayList<String>();
 
@@ -86,18 +91,12 @@ public class Wheel extends AppCompatActivity {
     private Button getRestaurantsButton;
     private String foodType;
 
-//    APIStaticInformation apiKeys = new APIStaticInformation();
-//    Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
-
     private GestureDetector detector;
     private boolean[] quadrantTouched;
     private boolean allowRotating;
 
-//    Async backgroundTasks = new Async();
-
-
     public void getChoices(){
-        int angle = 0;
+        float angle = 0;
         int amount = 8;
         int left = cuisines.length - alreadyPlaced.size()-rejected.size();
         if (left < amount ) amount = left;
@@ -114,13 +113,6 @@ public class Wheel extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wheel);
-//        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
-//        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                getRestaurant();
-//            }
-//        });
 
         // load the image only once
         if (imageOriginal == null) {
@@ -166,28 +158,69 @@ public class Wheel extends AppCompatActivity {
         getChoices();
         RelativeLayout myLayout = (RelativeLayout) findViewById(R.id.screen);
 
+        DisplayMetrics dm = new DisplayMetrics();
+        this.getWindowManager().getDefaultDisplay().getMetrics(dm);
+        int xDest = dm.widthPixels/2;
+        int statusBarOffset = dm.heightPixels - myLayout.getMeasuredHeight();
+
         for (int i= 0; i < alreadyPlaced.size(); i++) {
+            float angle = choices.get(alreadyPlaced.get(i));
             TextView text = new TextView(this);
-            text.setText(alreadyPlaced.get(i));
+            text.setText(alreadyPlaced.get(i) + " angle: " + angle);
             text.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT));
             text.setGravity(Gravity.CENTER);
-            myLayout.addView(text);
+            int id = View.generateViewId();
+            text.setId(id);
+            Animation animation;
+
+            AnimationSet animationSet = new AnimationSet(true);
+            TranslateAnimation a = new TranslateAnimation(
+                    //Animation.ABSOLUTE,200, Animation.ABSOLUTE,200,
+                    //Animation.ABSOLUTE,200, Animation.ABSOLUTE,200
+                    0, 300*(float)Math.cos(angle), 0, 300*(float)Math.sin(angle)
+                    );
+            a.setDuration(0);
+            a.setFillAfter(true); //HERE
+            animationSet.addAnimation(a);
+
+            RotateAnimation r = new RotateAnimation(0f, angle, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f); // HERE
+            r.setStartOffset(1);
+            r.setDuration(0);
+            r.setFillAfter(true); //HERE
+            animationSet.addAnimation(r);
+
+            if (angle > 0) {} else {
+                if (angle > 90 && angle < 270) angle -= 180;
+
+
+                xDest -= (text.getMeasuredWidth() / 2);
+                int yDest = dm.heightPixels / 2 - (text.getMeasuredHeight() / 2) - statusBarOffset;
+
+                int originalPos[] = new int[2];
+                text.getLocationOnScreen(originalPos);
+
+                TranslateAnimation anim = new TranslateAnimation(0, 100, 0, 100);
+                anim.setDuration(0);
+                anim.setFillAfter(true);
+                //text.setAnimation(anim);
+
+
+                animation = new RotateAnimation(0, angle, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                //"Save" the results of the animation
+                animation.setFillAfter(true);
+                //Set the animation duration to zero, just in case
+                animation.setDuration(0);
+
+                //Assign the animation to the TextView
+                text.startAnimation(a);
+//            text.setAnimation(trans1);
+                myLayout.addView(text);
+            }
         }
 
-
     }
-
-//    private void getRestaurant() {
-//        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
-//        // TODO change into actual variables to be passed in, determined by GPS data and time of day
-//        YelpParser yelpParser = new YelpParser();
-//        String response = yelp.search("chinese", 30.361471, -87.164326);
-//        // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
-//        // TODO Just send the entire JSON from Yelp to server
-//
-//    }
 
     private class MyOnTouchListener implements View.OnTouchListener {
 
