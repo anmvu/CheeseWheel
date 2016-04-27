@@ -330,7 +330,7 @@ public class Wheel extends AppCompatActivity {
 
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
-            String response = yelp.search("chinese", 30.361471, -87.164326);
+            String response = yelp.search("chinese", latitude, longitude);
             System.out.print("Yelp response:");
             System.out.print(response + "\n");
             // parse json to do something
