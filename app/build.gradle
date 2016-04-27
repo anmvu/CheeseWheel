@@ -25,6 +25,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:support-v4:23.2.1'
+    compile 'com.google.android.gms:play-services-location:7.+'
     compile files('/Users/xflyter/AndroidStudioProjects/CheeseWheel/.idea/libraries/json_simple-1.1.jar')
     compile files('/Users/xflyter/AndroidStudioProjects/CheeseWheel/.idea/libraries/jcommander-1.35.jar')
     compile files('/Users/xflyter/AndroidStudioProjects/CheeseWheel/.idea/libraries/scribe_1_3_2.jar')

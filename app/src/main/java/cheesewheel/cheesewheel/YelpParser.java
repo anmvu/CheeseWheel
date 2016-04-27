@@ -36,9 +36,19 @@ public class YelpParser {
         JSONObject o1 = new JSONObject(yelp_response);
         JSONArray businesses = o1.getJSONArray("businesses");
         String tmpString;
-        for (int i = 0; businesses.length() > i; i++){
-            tmpString = businesses.getJSONObject(i).get("mobile_url").toString() + " ,,, " +
-                    businesses.getJSONObject(i).get("rating_img_url").toString();
+        for (int i = 0; businesses.length() > i; i++) {
+            tmpString = businesses.getJSONObject(i).get("id").toString() + ",,," +
+                    businesses.getJSONObject(i).get("display_phone").toString() + ",,," +
+                    businesses.getJSONObject(i).get("url").toString() + ",,," +
+                    businesses.getJSONObject(i).get("rating").toString() + "[";
+            JSONObject o2 = new JSONObject(businesses.getJSONObject(i).get("location").toString());
+            JSONArray container = o2.getJSONArray("display_address");
+            for (int j = 0; container.length() > j; j++) {
+                tmpString += container.getString(j) + ", ";
+                if (j == (container.length() - 1)) {
+                    tmpString += "]";
+                }
+            }
             keys.add(businesses.getJSONObject(i).get("name").toString());
             yelp_bundle.putString(keys.get(i), tmpString);
         }

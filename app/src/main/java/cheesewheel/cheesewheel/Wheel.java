@@ -3,7 +3,6 @@ package cheesewheel.cheesewheel;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.gesture.Gesture;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -17,14 +16,28 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.view.GestureDetector;
-
+import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationListener;
+import org.json.JSONException;
+import org.json.JSONObject;
+import android.content.Context;
+import java.util.ArrayList;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.Manifest;
+import android.location.GpsStatus.Listener;
+import android.content.pm.PackageManager;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
 public class Wheel extends AppCompatActivity {
 
-    private static final String IP_ADDRESS = "172.16.21.188";
+    private static final String IP_ADDRESS = "172.16.22.91";
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -72,6 +85,35 @@ public class Wheel extends AppCompatActivity {
     private Button getRestaurantsButton;
     private String foodType;
 
+    LocationManager lm;
+    Location location;
+    double longitude;
+    double latitude;
+
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
+
+
     APIStaticInformation apiKeys = new APIStaticInformation();
     Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
 
@@ -79,7 +121,7 @@ public class Wheel extends AppCompatActivity {
     private boolean[] quadrantTouched;
     private boolean allowRotating;
 
-    Async backgroundTasks = new Async();
+    ServerConnection server = new ServerConnection();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,6 +134,19 @@ public class Wheel extends AppCompatActivity {
                 getRestaurant();
             }
         });
+
+        // GPS STUFF
+        lm =  (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        if (lm != null) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            }
+        }
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListener);
+        location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
 
         // load the image only once
         if (imageOriginal == null) {
@@ -140,11 +195,9 @@ public class Wheel extends AppCompatActivity {
     private void getRestaurant() {
         // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
         // TODO change into actual variables to be passed in, determined by GPS data and time of day
-        YelpParser yelpParser = new YelpParser();
-        String response = yelp.search("chinese", 30.361471, -87.164326);
         // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
         // TODO Just send the entire JSON from Yelp to server
-
+        new AsyncCaller().execute();
     }
 
     private class MyOnTouchListener implements View.OnTouchListener {
@@ -269,7 +322,7 @@ public class Wheel extends AppCompatActivity {
         protected  void onPreExecute() {
             super.onPreExecute();
 
-
+            // Loading screen or something
         }
 
         @Override
@@ -277,7 +330,33 @@ public class Wheel extends AppCompatActivity {
 
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
-
+            String response = yelp.search("chinese", 30.361471, -87.164326);
+            System.out.print("Yelp response:");
+            System.out.print(response + "\n");
+            // parse json to do something
+            YelpParser yParser = new YelpParser();
+            yParser.setResponse(response);
+            try {
+                yParser.parseBusiness();
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                //Do whatever you want with the error, like throw a Toast error report
+            }
+            Bundle tempBundle = yParser.getYelpBundle();
+            ArrayList<String> tempKeys = yParser.getBundleKeys();
+            // Recreate necessary JSON String now
+            JSONObject shorterResponse = new JSONObject();
+            for (String key : tempKeys) {
+                try {
+                shorterResponse.put(key, JSONObject.wrap(tempBundle.get(key)));
+                } catch (JSONException e) {
+                    // Some kind of error handling here
+                }
+            }
+            String strShorterResponse = shorterResponse.toString();
+            System.out.print("Our server repsonse:");
+            String serverResponse = server.send(strShorterResponse);
+            System.out.print(serverResponse);
             return null;
         }
 
@@ -286,7 +365,7 @@ public class Wheel extends AppCompatActivity {
             super.onPostExecute(result);
 
             //this method will be running on UI thread
-
+            // some type of alert to show that the querying and what not is done
         }
     }
 
