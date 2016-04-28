@@ -9,6 +9,7 @@ import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,14 +24,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Context;
 import java.util.ArrayList;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.Manifest;
-import android.location.GpsStatus.Listener;
 import android.content.pm.PackageManager;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -116,6 +113,7 @@ public class Wheel extends AppCompatActivity {
 
     APIStaticInformation apiKeys = new APIStaticInformation();
     Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
+    String restaurantData;
 
     private GestureDetector detector;
     private boolean[] quadrantTouched;
@@ -139,14 +137,16 @@ public class Wheel extends AppCompatActivity {
         lm =  (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         if (lm != null) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
+                    && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                System.out.println("permission has been granted");
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListener);
+                location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
             }
         }
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListener);
-        location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        longitude = location.getLongitude();
-        latitude = location.getLatitude();
 
         // load the image only once
         if (imageOriginal == null) {
@@ -191,12 +191,29 @@ public class Wheel extends AppCompatActivity {
         });
 
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // do something map related
+                    System.out.println("needed to request the permissions");
+                    try {
+                        location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    } catch (SecurityException e) {
+                        System.out.println("it failed");
+                    }
+                } else {
+
+                }
+                return;
+            }
+        }
+    }
 
     private void getRestaurant() {
-        // TODO Query Yelp API, Query our own server API, then get results and segue into the map view
-        // TODO change into actual variables to be passed in, determined by GPS data and time of day
-        // now we have the JSON response in response, get what we need by parsing it and then send it off to our server
-        // TODO Just send the entire JSON from Yelp to server
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
         new AsyncCaller().execute();
     }
 
@@ -327,7 +344,6 @@ public class Wheel extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void...params) {
-
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
             String response = yelp.search("chinese", latitude, longitude);
@@ -348,15 +364,17 @@ public class Wheel extends AppCompatActivity {
             JSONObject shorterResponse = new JSONObject();
             for (String key : tempKeys) {
                 try {
-                shorterResponse.put(key, JSONObject.wrap(tempBundle.get(key)));
+                    System.out.println("key:" + key + tempBundle.get(key));
+                    shorterResponse.put(key, JSONObject.wrap(tempBundle.get(key)));
                 } catch (JSONException e) {
                     // Some kind of error handling here
                 }
             }
             String strShorterResponse = shorterResponse.toString();
+            System.out.println("stringifed parsed json: " + strShorterResponse);
             System.out.print("Our server repsonse:");
-            String serverResponse = server.send(strShorterResponse);
-            System.out.print(serverResponse);
+            restaurantData = server.send(strShorterResponse);
+            System.out.print(restaurantData);
             return null;
         }
 
@@ -368,5 +386,4 @@ public class Wheel extends AppCompatActivity {
             // some type of alert to show that the querying and what not is done
         }
     }
-
 }
