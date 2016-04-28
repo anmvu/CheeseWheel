@@ -37,7 +37,7 @@ public class YelpParser {
         JSONArray businesses = o1.getJSONArray("businesses");
         String tmpString;
         for (int i = 0; businesses.length() > i; i++) {
-            tmpString = businesses.getJSONObject(i).get("id").toString() + ",,," +
+            tmpString =
                     businesses.getJSONObject(i).get("display_phone").toString() + ",,," +
                     businesses.getJSONObject(i).get("url").toString() + ",,," +
                     businesses.getJSONObject(i).get("rating").toString() + "[";
@@ -49,7 +49,7 @@ public class YelpParser {
                     tmpString += "]";
                 }
             }
-            keys.add(businesses.getJSONObject(i).get("name").toString());
+            keys.add(businesses.getJSONObject(i).get("name").toString().replaceAll("\\s+", ""));
             yelp_bundle.putString(keys.get(i), tmpString);
         }
     }

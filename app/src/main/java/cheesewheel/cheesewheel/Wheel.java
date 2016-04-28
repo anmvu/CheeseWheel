@@ -113,7 +113,7 @@ public class Wheel extends AppCompatActivity {
 
     APIStaticInformation apiKeys = new APIStaticInformation();
     Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
-    String restaurantData;
+    String restaurantData = "chinese";
 
     private GestureDetector detector;
     private boolean[] quadrantTouched;
@@ -346,7 +346,7 @@ public class Wheel extends AppCompatActivity {
         protected Void doInBackground(Void...params) {
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
-            String response = yelp.search("chinese", latitude, longitude);
+            String response = yelp.search(restaurantData, latitude, longitude);
             System.out.print("Yelp response:");
             System.out.print(response + "\n");
             // parse json to do something
@@ -362,18 +362,28 @@ public class Wheel extends AppCompatActivity {
             ArrayList<String> tempKeys = yParser.getBundleKeys();
             // Recreate necessary JSON String now
             JSONObject shorterResponse = new JSONObject();
+            String spaceDelimitedString = "SELECT ";
+            int position = 0;
+            // name (no spaces) id category
+            // ^ format of the string that's sent to the server
             for (String key : tempKeys) {
                 try {
-                    System.out.println("key:" + key + tempBundle.get(key));
+                    System.out.println("key:" + key +" category:" + restaurantData);
+                    spaceDelimitedString = spaceDelimitedString + key + " " + position + " " + restaurantData;
+                    if (position == tempKeys.size() - 1) {
+
+                    } else {
+                        spaceDelimitedString = spaceDelimitedString + " ";
+                    }
                     shorterResponse.put(key, JSONObject.wrap(tempBundle.get(key)));
                 } catch (JSONException e) {
                     // Some kind of error handling here
                 }
+                position = position + 1;
             }
-            String strShorterResponse = shorterResponse.toString();
-            System.out.println("stringifed parsed json: " + strShorterResponse);
+            System.out.println("new stuff sent to server: " + spaceDelimitedString);
             System.out.print("Our server repsonse:");
-            restaurantData = server.send(strShorterResponse);
+            restaurantData = server.send(spaceDelimitedString);
             System.out.print(restaurantData);
             return null;
         }
