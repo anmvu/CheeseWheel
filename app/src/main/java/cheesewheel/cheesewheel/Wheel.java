@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -39,11 +41,14 @@ public class Wheel extends AppCompatActivity {
 
     private static Random rand = new Random();
 
-    private static Map<String,Float> choices = new HashMap<String,Float>();
+    private static Map<String,Float> choices;
+    private static float[] angles;
 
-    private static ArrayList<String> alreadyPlaced = new ArrayList<String>();
+    private static ArrayList<String> alreadyPlaced;
 
-    private static ArrayList<String> rejected = new ArrayList<String>();
+    private static ArrayList<String> rejected;
+
+    private static String landed;
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -99,13 +104,18 @@ public class Wheel extends AppCompatActivity {
         float angle = 0;
         int amount = 8;
         int left = cuisines.length - alreadyPlaced.size()-rejected.size();
+
+        //System.out.println("left amount: " + left + " cuisines: " + cuisines.length + " already: " + alreadyPlaced.size() + " rejected: " + rejected.size() );
         if (left < amount ) amount = left;
+        //System.out.println("amount: " + amount);
+        angles = new float[amount];
         for (int i = 0; i < amount; i++){
             int index = rand.nextInt(cuisines.length);
             while(alreadyPlaced.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
             alreadyPlaced.add(cuisines[index]);
             choices.put(cuisines[index],angle);
-            angle += (360/amount);
+            angles[i] = angle;
+            angle += (360.0/amount);
         }
     }
 
@@ -155,69 +165,34 @@ public class Wheel extends AppCompatActivity {
                 }
             }
         });
+        choices = new HashMap<String,Float>();
+        alreadyPlaced = new ArrayList<String>();
+        rejected = new ArrayList<String>();
         getChoices();
         RelativeLayout myLayout = (RelativeLayout) findViewById(R.id.screen);
 
-        DisplayMetrics dm = new DisplayMetrics();
-        this.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int xDest = dm.widthPixels/2;
-        int statusBarOffset = dm.heightPixels - myLayout.getMeasuredHeight();
+        //System.out.println("amount " + alreadyPlaced.size());
 
         for (int i= 0; i < alreadyPlaced.size(); i++) {
             float angle = choices.get(alreadyPlaced.get(i));
             TextView text = new TextView(this);
-            text.setText(alreadyPlaced.get(i) + " angle: " + angle);
+            text.setText(alreadyPlaced.get(i));
             text.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT));
             text.setGravity(Gravity.CENTER);
             int id = View.generateViewId();
-            text.setId(id);
-            Animation animation;
+            float rotate = angle;
+            if (rotate > 90 && rotate < 270) rotate -= 180;
+            text.setRotation(rotate);
 
-            AnimationSet animationSet = new AnimationSet(true);
-            TranslateAnimation a = new TranslateAnimation(
-                    //Animation.ABSOLUTE,200, Animation.ABSOLUTE,200,
-                    //Animation.ABSOLUTE,200, Animation.ABSOLUTE,200
-                    0, 300*(float)Math.cos(angle), 0, 300*(float)Math.sin(angle)
-                    );
-            a.setDuration(0);
-            a.setFillAfter(true); //HERE
-            animationSet.addAnimation(a);
+            text.setTranslationX(300*(float)Math.cos(Math.toRadians(angle)));
+            text.setTranslationY(300*(float)Math.sin(Math.toRadians(angle)));
+            //System.out.println(alreadyPlaced.get(i) + " before: " + angle + " X: " + text.getX() + " Y: " + text.getY());
 
-            RotateAnimation r = new RotateAnimation(0f, angle, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f); // HERE
-            r.setStartOffset(1);
-            r.setDuration(0);
-            r.setFillAfter(true); //HERE
-            animationSet.addAnimation(r);
+            //System.out.println(alreadyPlaced.get(i) + " after: " + angle);
+            myLayout.addView(text);
 
-            if (angle > 0) {} else {
-                if (angle > 90 && angle < 270) angle -= 180;
-
-
-                xDest -= (text.getMeasuredWidth() / 2);
-                int yDest = dm.heightPixels / 2 - (text.getMeasuredHeight() / 2) - statusBarOffset;
-
-                int originalPos[] = new int[2];
-                text.getLocationOnScreen(originalPos);
-
-                TranslateAnimation anim = new TranslateAnimation(0, 100, 0, 100);
-                anim.setDuration(0);
-                anim.setFillAfter(true);
-                //text.setAnimation(anim);
-
-
-                animation = new RotateAnimation(0, angle, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                //"Save" the results of the animation
-                animation.setFillAfter(true);
-                //Set the animation duration to zero, just in case
-                animation.setDuration(0);
-
-                //Assign the animation to the TextView
-                text.startAnimation(a);
-//            text.setAnimation(trans1);
-                myLayout.addView(text);
-            }
         }
 
     }
@@ -248,7 +223,23 @@ public class Wheel extends AppCompatActivity {
 
             quadrantTouched[getQuadrant(event.getX() - (dialerWidth / 2), dialerHeight - event.getY() - (dialerHeight / 2))] = true;
             detector.onTouchEvent(event);
-
+            System.out.println("angle: " + startAngle);
+            double landedAngle = startAngle;
+            float range = 360/choices.size();
+            for(int i = 0; i < angles.length; i++){
+                if (startAngle >= angles[i] && startAngle < angles[i]+range){
+                    landedAngle = angles[i];
+                }
+            }
+            System.out.println("landed: "+ landedAngle);
+            for(String o : choices.keySet()){
+//                System.out.println(choices.get(o));
+                if(choices.get(o).equals((float)landedAngle)) {
+                    System.out.println("found");
+                    landed = o;
+                }
+            }
+            System.out.println("text: " + landed);
             return true;
         }
 
