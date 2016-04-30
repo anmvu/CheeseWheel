@@ -1,12 +1,14 @@
 package cheesewheel.cheesewheel;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -44,11 +46,15 @@ public class Wheel extends AppCompatActivity {
     private static Map<String,Float> choices;
     private static float[] angles;
 
+    private static float ration;
+
     private static ArrayList<String> alreadyPlaced;
 
     private static ArrayList<String> rejected;
 
     private static String landed;
+    private static int amount = 8;
+
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -101,22 +107,56 @@ public class Wheel extends AppCompatActivity {
     private boolean allowRotating;
 
     public void getChoices(){
-        float angle = 0;
-        int amount = 8;
         int left = cuisines.length - alreadyPlaced.size()-rejected.size();
-
         //System.out.println("left amount: " + left + " cuisines: " + cuisines.length + " already: " + alreadyPlaced.size() + " rejected: " + rejected.size() );
-        if (left < amount ) amount = left;
+        while (left < amount ) amount /= 2;
         //System.out.println("amount: " + amount);
+        ration = 360/amount;
+        float angle = 0;
         angles = new float[amount];
         for (int i = 0; i < amount; i++){
             int index = rand.nextInt(cuisines.length);
             while(alreadyPlaced.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
             alreadyPlaced.add(cuisines[index]);
-            choices.put(cuisines[index],angle);
+            //System.out.println(angle);
+            choices.put(cuisines[index], angle);
             angles[i] = angle;
-            angle += (360.0/amount);
+            angle += ration;
         }
+    }
+
+    public float getRotation(float angle, int amount){
+        float rotate = angle;
+        float weirdRotate = 90;
+//        if(amount == 6) weirdRotate = ration*2;
+//        else if(amount %2 != 0) weirdRotate = ration*2;
+        if(amount % 2 == 0) {
+            if (rotate < 90 && rotate > 0) rotate -= weirdRotate;
+            else if (rotate < 180 && rotate > 90) if(amount == 6) rotate -= weirdRotate/2; else rotate-= weirdRotate;
+            else if (rotate < 270 && rotate > 180) if(amount == 6) rotate += weirdRotate/2; else rotate+= weirdRotate;
+            else if (rotate < 360 && rotate > 270) rotate += weirdRotate;
+            else if (rotate == 180 || rotate == 90) rotate += 180;
+        }
+//        else if(amount == 7){
+//            if(rotate < 90 && rotate > 0)rotate -= weirdRotate;
+//            else if(rotate > 270) rotate+= weirdRotate;
+//            else if(rotate < 152 && rotate > 90) rotate -= weirdRotate*2+180;
+//            else if(rotate < 270 && rotate > 254) rotate += weirdRotate*2+180;
+//            else if(rotate < 180 && rotate > 152) rotate -= weirdRotate;
+//            else if(rotate < 255 && rotate > 180) rotate += weirdRotate/2+weirdRotate;
+//        }
+//        else if(amount == 5){
+//            if(rotate < 90 && rotate > 0)rotate -= weirdRotate;
+//            else if(rotate > 270) rotate+= weirdRotate;
+//            else if(rotate < 180 && rotate > 90) rotate -= weirdRotate*2+180;
+//            else if(rotate < 270 && rotate > 180) rotate += weirdRotate*2+180;
+//        }
+//        else if(amount == 3){
+//            if(rotate < 180 && rotate > 90) rotate -= weirdRotate+180;
+//            else if(rotate < 270 && rotate > 180) rotate += weirdRotate+180;
+//        }
+//        System.out.println("rotating: " + rotate);
+        return rotate;
     }
 
     @Override
@@ -177,18 +217,21 @@ public class Wheel extends AppCompatActivity {
             float angle = choices.get(alreadyPlaced.get(i));
             TextView text = new TextView(this);
             text.setText(alreadyPlaced.get(i));
+//            text.setText(alreadyPlaced.get(i));
             text.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT));
             text.setGravity(Gravity.CENTER);
             int id = View.generateViewId();
-            float rotate = angle;
-            if (rotate > 90 && rotate < 270) rotate -= 180;
+            System.out.println(alreadyPlaced.get(i));
+            float rotate = getRotation(angle, amount);
             text.setRotation(rotate);
 
-            text.setTranslationX(300*(float)Math.cos(Math.toRadians(angle)));
-            text.setTranslationY(300*(float)Math.sin(Math.toRadians(angle)));
+            text.setTranslationX(300 * (float) Math.cos(Math.toRadians(angle)));
+            text.setTranslationY(-300 * (float) Math.sin(Math.toRadians(angle)));
             //System.out.println(alreadyPlaced.get(i) + " before: " + angle + " X: " + text.getX() + " Y: " + text.getY());
+            text.setTextSize(17.0f);
+            text.setAllCaps(true);
 
             //System.out.println(alreadyPlaced.get(i) + " after: " + angle);
             myLayout.addView(text);
@@ -200,7 +243,6 @@ public class Wheel extends AppCompatActivity {
     private class MyOnTouchListener implements View.OnTouchListener {
 
         private double startAngle;
-
         @Override
         public boolean onTouch(View v, MotionEvent event) {
 
@@ -208,6 +250,7 @@ public class Wheel extends AppCompatActivity {
 
                 case MotionEvent.ACTION_DOWN:
                     startAngle = getAngle(event.getX(), event.getY());
+
                     break;
 
                 case MotionEvent.ACTION_MOVE:
@@ -221,30 +264,12 @@ public class Wheel extends AppCompatActivity {
                     break;
             }
 
+
             quadrantTouched[getQuadrant(event.getX() - (dialerWidth / 2), dialerHeight - event.getY() - (dialerHeight / 2))] = true;
             detector.onTouchEvent(event);
-            System.out.println("angle: " + startAngle);
-            double landedAngle = startAngle;
-            float range = 360/choices.size();
-            for(int i = 0; i < angles.length; i++){
-                if (startAngle >= angles[i] && startAngle < angles[i]+range){
-                    landedAngle = angles[i];
-                }
-            }
-            System.out.println("landed: "+ landedAngle);
-            for(String o : choices.keySet()){
-//                System.out.println(choices.get(o));
-                if(choices.get(o).equals((float)landedAngle)) {
-                    System.out.println("found");
-                    landed = o;
-                }
-            }
-            System.out.println("text: " + landed);
+
             return true;
         }
-
-
-
     }
 
     private class MyGestureDetector extends GestureDetector.SimpleOnGestureListener {
@@ -282,6 +307,28 @@ public class Wheel extends AppCompatActivity {
                 velocity /= 1.0666F;
                 dialer.post(this);
             }
+            float[] vert = new float[9];
+            matrix.getValues(vert) ;
+            double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
+            System.out.println("before: " + bleh);
+            bleh += 90;
+            if(bleh < 0) bleh+=360;
+            if(bleh > 360) bleh-=360;
+            System.out.println("angle: " + bleh);
+            double landedAngle = bleh;
+            float range = 360/choices.size()/2;
+            for(int i = 0; i < angles.length; i++){
+                if (bleh >= angles[i]-range && bleh < angles[i]+range){
+                    landedAngle = angles[i];
+                }
+            }
+
+            for(String o : choices.keySet()){
+                if(choices.get(o).equals((float)landedAngle)) {
+                    landed = o;
+                }
+            }
+            System.out.println("landed at: " + landedAngle + " on " + landed);
         }
     }
 

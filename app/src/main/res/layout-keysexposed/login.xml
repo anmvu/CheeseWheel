@@ -13,8 +13,8 @@
         android:paddingRight="24dp">
 
         <ImageView android:src="@drawable/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="72dp"
+            android:layout_width="513dp"
+            android:layout_height="110dp"
             android:layout_marginBottom="24dp"
             android:layout_gravity="center_horizontal" />
 
@@ -23,12 +23,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
-            <EditText android:id="@+id/input_email"
+            android:layout_marginBottom="8dp"
+            android:hint="Email"
+            >
+            <EditText
+                android:id="@+id/input_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:hint="Email" />
+                 />
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Label -->
@@ -36,12 +39,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="8dp"
+            android:hint="Password">
             <EditText android:id="@+id/input_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:hint="Password"/>
+                />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
@@ -60,6 +64,18 @@
             android:text="No account yet? Create one"
             android:gravity="center"
             android:textSize="16dip"/>
+
+        <TextView
+            android:id="@+id/offline"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="24dp"
+            android:text="Continue without signing in"
+            android:gravity="center"
+            android:textSize="24dip"
+            android:layout_gravity="center_horizontal"
+            android:textIsSelectable="false"
+            android:textColor="#000000"/>
 
     </LinearLayout>
 </ScrollView>

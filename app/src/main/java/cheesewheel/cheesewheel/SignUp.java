@@ -1,6 +1,7 @@
 package cheesewheel.cheesewheel;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,6 +22,7 @@ public class SignUp extends AppCompatActivity {
     @InjectView(R.id.input_password) EditText _passwordText;
     @InjectView(R.id.btn_signup) Button _signupButton;
     @InjectView(R.id.link_login) TextView _loginLink;
+    @InjectView(R.id.offline) TextView _wheelLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,16 @@ public class SignUp extends AppCompatActivity {
                 finish();
             }
         });
+
+        _wheelLink.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Wheel.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     public void signup() {
