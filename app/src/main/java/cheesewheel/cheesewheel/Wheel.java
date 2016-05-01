@@ -1,30 +1,21 @@
 package cheesewheel.cheesewheel;
 
 import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,11 +26,16 @@ import java.util.Random;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class Wheel extends AppCompatActivity {
-
+public class Wheel extends AppCompatActivity implements ToActivity{
     private static final String IP_ADDRESS = "172.16.21.188";
 
-    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean"};
+    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean",
+            "Malaysian","Greek","Turkish","Moroccon","Chicken","Burgers","Bar Food","Mexican","Cafes","Seafood","Pizza","Sushi","Soul","Korean",
+            "Vietnamese","Asian","Pastries","French","German","Vegetarian","Vegan","Jewish","Chinese-Islamic","Chinese-Mexican","Tex-Mex","Steak",
+            "Hot Pot","Indian"
+    };
+
+
 
     private static Random rand = new Random();
 
@@ -55,6 +51,9 @@ public class Wheel extends AppCompatActivity {
     private static String landed;
     private static int amount = 8;
 
+    private Wheel  activity= new Wheel();
+
+    private Choice flash;
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -162,6 +161,9 @@ public class Wheel extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        flash = new Choice();
+
         setContentView(R.layout.activity_wheel);
 
         // load the image only once
@@ -213,30 +215,30 @@ public class Wheel extends AppCompatActivity {
 
         //System.out.println("amount " + alreadyPlaced.size());
 
-        for (int i= 0; i < alreadyPlaced.size(); i++) {
-            float angle = choices.get(alreadyPlaced.get(i));
-            TextView text = new TextView(this);
-            text.setText(alreadyPlaced.get(i));
+//        for (int i= 0; i < alreadyPlaced.size(); i++) {
+//            float angle = choices.get(alreadyPlaced.get(i));
+//            TextView text = new TextView(this);
 //            text.setText(alreadyPlaced.get(i));
-            text.setLayoutParams(new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.MATCH_PARENT,
-                    RelativeLayout.LayoutParams.MATCH_PARENT));
-            text.setGravity(Gravity.CENTER);
-            int id = View.generateViewId();
-            System.out.println(alreadyPlaced.get(i));
-            float rotate = getRotation(angle, amount);
-            text.setRotation(rotate);
-
-            text.setTranslationX(300 * (float) Math.cos(Math.toRadians(angle)));
-            text.setTranslationY(-300 * (float) Math.sin(Math.toRadians(angle)));
-            //System.out.println(alreadyPlaced.get(i) + " before: " + angle + " X: " + text.getX() + " Y: " + text.getY());
-            text.setTextSize(17.0f);
-            text.setAllCaps(true);
-
-            //System.out.println(alreadyPlaced.get(i) + " after: " + angle);
-            myLayout.addView(text);
-
-        }
+////            text.setText(alreadyPlaced.get(i));
+//            text.setLayoutParams(new RelativeLayout.LayoutParams(
+//                    RelativeLayout.LayoutParams.MATCH_PARENT,
+//                    RelativeLayout.LayoutParams.MATCH_PARENT));
+//            text.setGravity(Gravity.CENTER);
+//            int id = View.generateViewId();
+//            System.out.println(alreadyPlaced.get(i));
+//            float rotate = getRotation(angle, amount);
+//            text.setRotation(rotate);
+//
+//            text.setTranslationX(300 * (float) Math.cos(Math.toRadians(angle)));
+//            text.setTranslationY(-300 * (float) Math.sin(Math.toRadians(angle)));
+//            //System.out.println(alreadyPlaced.get(i) + " before: " + angle + " X: " + text.getX() + " Y: " + text.getY());
+//            text.setTextSize(17.0f);
+//            text.setAllCaps(true);
+//
+//            //System.out.println(alreadyPlaced.get(i) + " after: " + angle);
+//            myLayout.addView(text);
+//
+//        }
 
     }
 
@@ -307,28 +309,38 @@ public class Wheel extends AppCompatActivity {
                 velocity /= 1.0666F;
                 dialer.post(this);
             }
-            float[] vert = new float[9];
-            matrix.getValues(vert) ;
-            double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
-            System.out.println("before: " + bleh);
-            bleh += 90;
-            if(bleh < 0) bleh+=360;
-            if(bleh > 360) bleh-=360;
-            System.out.println("angle: " + bleh);
-            double landedAngle = bleh;
-            float range = 360/choices.size()/2;
-            for(int i = 0; i < angles.length; i++){
-                if (bleh >= angles[i]-range && bleh < angles[i]+range){
-                    landedAngle = angles[i];
+            else if(!allowRotating && velocity < 1) {
+                float[] vert = new float[9];
+                matrix.getValues(vert);
+                double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
+                System.out.println("before: " + bleh);
+                bleh += 90;
+                if (bleh < 0) bleh += 360;
+                if (bleh > 360) bleh -= 360;
+                System.out.println("angle: " + bleh);
+                double landedAngle = bleh;
+                float range = 360 / choices.size() / 2;
+                for (int i = 0; i < angles.length; i++) {
+                    if (bleh >= angles[i] - range && bleh < angles[i] + range) {
+                        landedAngle = angles[i];
+                    }
                 }
-            }
 
-            for(String o : choices.keySet()){
-                if(choices.get(o).equals((float)landedAngle)) {
-                    landed = o;
+                for (String o : choices.keySet()) {
+                    if (choices.get(o).equals((float) landedAngle)) {
+                        landed = o;
+                    }
                 }
+                System.out.println("landed at: " + landedAngle + " on " + landed);
+                passToActivity(landed);
             }
-            System.out.println("landed at: " + landedAngle + " on " + landed);
+        }
+    }
+
+    public void setFragment(Fragment frag){
+        FragmentManager fm = getFragmentManager();
+        if (fm.findFragmentById(R.id.chooseLanded) == null) {
+            fm.beginTransaction().add(R.id.chooseLanded, frag).commit();
         }
     }
 
@@ -366,4 +378,12 @@ public class Wheel extends AppCompatActivity {
         dialer.setImageMatrix(matrix);
     }
 
+
+
+    @Override
+    public void passToActivity(String choice){
+        //Do something with the position value passed back
+
+    }
 }
+

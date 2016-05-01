@@ -23,21 +23,13 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     //compile 'com.jakewharton:butterknife:6.1.0'
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.0.0'
-    compile 'com.android.support:support-v4:24.0.0'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:support-v4:23.2.1'
     compile fileTree(dir: 'libs', include: ['*.jar'])
-<<<<<<< HEAD
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:design:24.2.0'
-    compile 'com.jakewharton:butterknife:6.1.0'
-    compile files('.idea/libraries/scribe-1.2.1.jar')
-    compile files('.idea/libraries/json_simple-1.1.jar')
-    compile files('.idea/libraries/jcommander-1.35.jar')
-    compile files('.idea/libraries/scribe_1_3_2.jar')
-    compile files('.idea/libraries/scribe-1.3.0.jar')
-=======
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:design:23.2.0'
     compile 'com.jakewharton:butterknife:6.1.0'
->>>>>>> a24a576bc127c4a10f62820c0d9ee52e345c1711
+    //compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    compile 'org.scribe:scribe:1.3.7'
+
 }
