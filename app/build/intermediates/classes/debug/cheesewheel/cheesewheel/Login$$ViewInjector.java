@@ -8,14 +8,16 @@ import butterknife.ButterKnife.Injector;
 public class Login$$ViewInjector<T extends cheesewheel.cheesewheel.Login> implements Injector<T> {
   @Override public void inject(final Finder finder, final T target, Object source) {
     View view;
-    view = finder.findRequiredView(source, 2131492971, "field '_emailText'");
-    target._emailText = finder.castView(view, 2131492971, "field '_emailText'");
-    view = finder.findRequiredView(source, 2131492972, "field '_passwordText'");
-    target._passwordText = finder.castView(view, 2131492972, "field '_passwordText'");
-    view = finder.findRequiredView(source, 2131492973, "field '_loginButton'");
-    target._loginButton = finder.castView(view, 2131492973, "field '_loginButton'");
-    view = finder.findRequiredView(source, 2131492974, "field '_signupLink'");
-    target._signupLink = finder.castView(view, 2131492974, "field '_signupLink'");
+    view = finder.findRequiredView(source, 2131492979, "field '_emailText'");
+    target._emailText = finder.castView(view, 2131492979, "field '_emailText'");
+    view = finder.findRequiredView(source, 2131492980, "field '_passwordText'");
+    target._passwordText = finder.castView(view, 2131492980, "field '_passwordText'");
+    view = finder.findRequiredView(source, 2131492981, "field '_loginButton'");
+    target._loginButton = finder.castView(view, 2131492981, "field '_loginButton'");
+    view = finder.findRequiredView(source, 2131492982, "field '_signupLink'");
+    target._signupLink = finder.castView(view, 2131492982, "field '_signupLink'");
+    view = finder.findRequiredView(source, 2131492983, "field '_wheelLink'");
+    target._wheelLink = finder.castView(view, 2131492983, "field '_wheelLink'");
   }
 
   @Override public void reset(T target) {
@@ -23,5 +25,6 @@ public class Login$$ViewInjector<T extends cheesewheel.cheesewheel.Login> implem
     target._passwordText = null;
     target._loginButton = null;
     target._signupLink = null;
+    target._wheelLink = null;
   }
 }

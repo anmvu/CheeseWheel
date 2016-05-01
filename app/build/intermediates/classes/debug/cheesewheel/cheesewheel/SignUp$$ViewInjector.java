@@ -8,16 +8,18 @@ import butterknife.ButterKnife.Injector;
 public class SignUp$$ViewInjector<T extends cheesewheel.cheesewheel.SignUp> implements Injector<T> {
   @Override public void inject(final Finder finder, final T target, Object source) {
     View view;
-    view = finder.findRequiredView(source, 2131492988, "field '_nameText'");
-    target._nameText = finder.castView(view, 2131492988, "field '_nameText'");
-    view = finder.findRequiredView(source, 2131492971, "field '_emailText'");
-    target._emailText = finder.castView(view, 2131492971, "field '_emailText'");
-    view = finder.findRequiredView(source, 2131492972, "field '_passwordText'");
-    target._passwordText = finder.castView(view, 2131492972, "field '_passwordText'");
-    view = finder.findRequiredView(source, 2131492989, "field '_signupButton'");
-    target._signupButton = finder.castView(view, 2131492989, "field '_signupButton'");
-    view = finder.findRequiredView(source, 2131492990, "field '_loginLink'");
-    target._loginLink = finder.castView(view, 2131492990, "field '_loginLink'");
+    view = finder.findRequiredView(source, 2131492997, "field '_nameText'");
+    target._nameText = finder.castView(view, 2131492997, "field '_nameText'");
+    view = finder.findRequiredView(source, 2131492979, "field '_emailText'");
+    target._emailText = finder.castView(view, 2131492979, "field '_emailText'");
+    view = finder.findRequiredView(source, 2131492980, "field '_passwordText'");
+    target._passwordText = finder.castView(view, 2131492980, "field '_passwordText'");
+    view = finder.findRequiredView(source, 2131492998, "field '_signupButton'");
+    target._signupButton = finder.castView(view, 2131492998, "field '_signupButton'");
+    view = finder.findRequiredView(source, 2131492999, "field '_loginLink'");
+    target._loginLink = finder.castView(view, 2131492999, "field '_loginLink'");
+    view = finder.findRequiredView(source, 2131492983, "field '_wheelLink'");
+    target._wheelLink = finder.castView(view, 2131492983, "field '_wheelLink'");
   }
 
   @Override public void reset(T target) {
@@ -26,5 +28,6 @@ public class SignUp$$ViewInjector<T extends cheesewheel.cheesewheel.SignUp> impl
     target._passwordText = null;
     target._signupButton = null;
     target._loginLink = null;
+    target._wheelLink = null;
   }
 }

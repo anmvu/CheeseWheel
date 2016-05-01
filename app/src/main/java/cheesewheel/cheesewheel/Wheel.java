@@ -36,8 +36,7 @@ import java.util.Random;
  * status bar and navigation/system bar) with user interaction.
  */
 public class Wheel extends AppCompatActivity {
-
-    private static final String IP_ADDRESS = "172.16.21.188";
+    String loginUsername;
 
     private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean"};
 
@@ -162,6 +161,14 @@ public class Wheel extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            loginUsername = extras.getString("loginUsername");
+        }
+
+        System.out.println("loginusername: " + loginUsername);
+
         setContentView(R.layout.activity_wheel);
 
         // load the image only once

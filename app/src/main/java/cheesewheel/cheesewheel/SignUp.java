@@ -10,12 +10,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.AsyncTask;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 public class SignUp extends AppCompatActivity {
     private static final String TAG = "SignUp";
+    String loginUsername;
+
+    ServerConnection serverConnection = new ServerConnection();
+    Boolean didSignUp = true;
+    ProgressDialog progressDialog;
 
     @InjectView(R.id.input_name) EditText _nameText;
     @InjectView(R.id.input_email) EditText _emailText;
@@ -29,6 +35,9 @@ public class SignUp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.signup);
         ButterKnife.inject(this);
+
+        progressDialog = new ProgressDialog(SignUp.this,
+                R.style.AppTheme_Dark_Dialog);
 
         _signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,6 +59,7 @@ public class SignUp extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Wheel.class);
+                intent.putExtra("loginUsername", loginUsername);
                 startActivity(intent);
             }
         });
@@ -66,39 +76,22 @@ public class SignUp extends AppCompatActivity {
 
         _signupButton.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(SignUp.this,
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Creating Account...");
-        progressDialog.show();
+        loginUsername = _nameText.getText().toString();
 
-        String name = _nameText.getText().toString();
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
-
-        // TODO: Implement your own signup logic here.
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onSignupSuccess or onSignupFailed
-                        // depending on success
-                        onSignupSuccess();
-                        // onSignupFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        new SignUpAsyncCaller().execute();
     }
 
 
     public void onSignupSuccess() {
         _signupButton.setEnabled(true);
         setResult(RESULT_OK, null);
-        finish();
+        Intent intent = new Intent(getApplicationContext(), Wheel.class);
+        intent.putExtra("loginUsername", loginUsername);
+        startActivity(intent);
     }
 
     public void onSignupFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+        Toast.makeText(getBaseContext(), "Sign-up failed", Toast.LENGTH_LONG).show();
 
         _signupButton.setEnabled(true);
     }
@@ -132,5 +125,50 @@ public class SignUp extends AppCompatActivity {
         }
 
         return valid;
+    }
+
+    public void register() {
+        String registerStr = "register " + _nameText.getText().toString() + " " + _passwordText.getText().toString() + " " + _emailText.getText().toString();
+        String success = serverConnection.send(registerStr);
+        System.out.println("success variable: " + success);
+        if (success.equals("true")) {
+            didSignUp = true;
+        } else {
+            didSignUp = false;
+        }
+    }
+
+    private class SignUpAsyncCaller extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected  void onPreExecute() {
+            super.onPreExecute();
+
+            progressDialog.setIndeterminate(true);
+            progressDialog.setMessage("Creating Account...");
+            progressDialog.show();
+
+            // Loading screen or something
+        }
+
+        @Override
+        protected Void doInBackground(Void...params) {
+            register();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            System.out.println("onPostExecute:");
+            super.onPostExecute(result);
+            System.out.println("didsignup variable: " + didSignUp);
+            progressDialog.dismiss();
+            if (didSignUp) {
+                onSignupSuccess();
+            } else {
+                onSignupFailed();
+            }
+            //this method will be running on UI thread
+            // some type of alert to show that the querying and what not is done
+        }
     }
 }

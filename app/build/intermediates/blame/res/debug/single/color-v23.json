@@ -1,5 +1,9 @@
 [
     {
+        "merged": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/res/merged/debug/color-v23/abc_color_highlight_material.xml",
+        "source": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.2.1/res/color-v23/abc_color_highlight_material.xml"
+    },
+    {
         "merged": "/Users/webteam/Documents/CheeseWheel/app/build/intermediates/res/merged/debug/color-v23/abc_color_highlight_material.xml",
         "source": "/Users/webteam/Documents/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.2.1/res/color-v23/abc_color_highlight_material.xml"
     }
