@@ -5,7 +5,9 @@ package cheesewheel.cheesewheel;
  */
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -22,11 +24,12 @@ import butterknife.InjectView;
 public class Login extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
-
+    boolean isLogin = false;
     @InjectView(R.id.input_email) EditText _emailText;
     @InjectView(R.id.input_password) EditText _passwordText;
     @InjectView(R.id.btn_login) Button _loginButton;
     @InjectView(R.id.link_signup) TextView _signupLink;
+    @InjectView(R.id.offline) TextView _wheelLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,6 +52,15 @@ public class Login extends AppCompatActivity {
                 // Start the Signup activity
                 Intent intent = new Intent(getApplicationContext(), SignUp.class);
                 startActivityForResult(intent, REQUEST_SIGNUP);
+            }
+        });
+
+        _wheelLink.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Wheel.class);
+                startActivity(intent);
             }
         });
     }
@@ -83,6 +95,12 @@ public class Login extends AppCompatActivity {
                         progressDialog.dismiss();
                     }
                 }, 3000);
+
+
+        isLogin = true;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("isLogin",isLogin).commit();
+
     }
 
 
