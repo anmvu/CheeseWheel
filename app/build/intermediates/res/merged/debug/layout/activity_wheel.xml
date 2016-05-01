@@ -1,0 +1,35 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#FF0000"
+    tools:context="cheesewheel.cheesewheel.Wheel">
+
+    <ImageView
+        android:id="@+id/inside_imageview"
+        android:layout_width="500dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/cheese"
+        android:scaleType="center"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
+
+    <ImageView
+        android:id="@+id/imageView_ring"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:scaleType="matrix"
+        android:src="@drawable/fork"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/getRestaurants"
+        android:text="Get Restaurants!"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="getRestaurants"/>
+
+</RelativeLayout>
+
