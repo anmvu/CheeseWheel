@@ -1,32 +1,34 @@
 package cheesewheel.cheesewheel;
 
 import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
+import android.os.AsyncTask;
+import android.support.v4.app.ActivityCompat;
+import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationListener;
+import org.json.JSONException;
+import org.json.JSONObject;
+import android.content.Context;
 import java.util.ArrayList;
+import android.support.v4.content.ContextCompat;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -101,6 +103,42 @@ public class Wheel extends AppCompatActivity {
     private Button getRestaurantsButton;
     private String foodType;
 
+    LocationManager lm;
+    Location location;
+    double longitude;
+    double latitude;
+
+    ProgressDialog progressDialog;
+
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
+
+    APIStaticInformation apiKeys = new APIStaticInformation();
+    Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
+    String restaurantData = "chinese";
+
+    ServerConnection server = new ServerConnection();
+
     private GestureDetector detector;
     private boolean[] quadrantTouched;
     private boolean allowRotating;
@@ -170,6 +208,25 @@ public class Wheel extends AppCompatActivity {
         System.out.println("loginusername: " + loginUsername);
 
         setContentView(R.layout.activity_wheel);
+
+        progressDialog = new ProgressDialog(Wheel.this,
+                R.style.AppTheme_Dark_Dialog);
+
+        // GPS Stuff
+
+        lm =  (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        if (lm != null) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                System.out.println("permission has been granted");
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListener);
+                location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+            }
+        }
 
         // load the image only once
         if (imageOriginal == null) {
@@ -245,6 +302,26 @@ public class Wheel extends AppCompatActivity {
 
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // do something map related
+                    System.out.println("needed to request the permissions");
+                    try {
+                        location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    } catch (SecurityException e) {
+                        System.out.println("it failed");
+                    }
+                } else {
+
+                }
+                return;
+            }
+        }
     }
 
     private class MyOnTouchListener implements View.OnTouchListener {
@@ -336,6 +413,7 @@ public class Wheel extends AppCompatActivity {
                 }
             }
             System.out.println("landed at: " + landedAngle + " on " + landed);
+            restaurantData = landed;
         }
     }
 
@@ -371,6 +449,78 @@ public class Wheel extends AppCompatActivity {
     private void rotateDialer(float degrees) {
         matrix.postRotate(degrees, dialerWidth / 2, dialerHeight / 2);
         dialer.setImageMatrix(matrix);
+    }
+
+    public void getRestaurant() {
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+        new AsyncCaller().execute();
+    }
+
+    private class AsyncCaller extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected  void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.setIndeterminate(true);
+            progressDialog.setMessage("Determining Restaurants...");
+            progressDialog.show();
+            // Loading screen or something
+        }
+
+        @Override
+        protected Void doInBackground(Void...params) {
+            //this method will be running on background thread so don't update UI frome here
+            //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
+            String response = yelp.search(restaurantData, latitude, longitude);
+            System.out.print("Yelp response:");
+            System.out.print(response + "\n");
+            // parse json to do something
+            YelpParser yParser = new YelpParser();
+            yParser.setResponse(response);
+            try {
+                yParser.parseBusiness();
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                //Do whatever you want with the error, like throw a Toast error report
+            }
+            Bundle tempBundle = yParser.getYelpBundle();
+            ArrayList<String> tempKeys = yParser.getBundleKeys();
+            // Recreate necessary JSON String now
+            JSONObject shorterResponse = new JSONObject();
+            String spaceDelimitedString = "select " + loginUsername;
+            int position = 0;
+            // name (no spaces) id category
+            // ^ format of the string that's sent to the server
+            for (String key : tempKeys) {
+                try {
+                    System.out.println("key:" + key +" category:" + restaurantData);
+                    spaceDelimitedString = spaceDelimitedString + key + " " + position + " " + restaurantData;
+                    if (position == tempKeys.size() - 1) {
+
+                    } else {
+                        spaceDelimitedString = spaceDelimitedString + " ";
+                    }
+                    shorterResponse.put(key, JSONObject.wrap(tempBundle.get(key)));
+                } catch (JSONException e) {
+                    // Some kind of error handling here
+                }
+                position = position + 1;
+            }
+            System.out.println("new stuff sent to server: " + spaceDelimitedString);
+            System.out.print("Our server repsonse:");
+            restaurantData = server.send(spaceDelimitedString);
+            System.out.print(restaurantData);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            progressDialog.dismiss();
+
+            //this method will be running on UI thread
+            // some type of alert to show that the querying and what not is done
+        }
     }
 
 }
