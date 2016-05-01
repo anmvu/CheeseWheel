@@ -27,7 +27,7 @@ public class Login extends AppCompatActivity {
     private static final int REQUEST_SIGNUP = 0;
     String loginUsername;
     boolean isLogin = false;
-    @InjectView(R.id.input_email) EditText _emailText;
+    @InjectView(R.id.input_name) EditText _emailText;
     @InjectView(R.id.input_password) EditText _passwordText;
     @InjectView(R.id.btn_login) Button _loginButton;
     @InjectView(R.id.link_signup) TextView _signupLink;

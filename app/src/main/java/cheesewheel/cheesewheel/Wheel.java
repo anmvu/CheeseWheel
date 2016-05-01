@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.location.Criteria;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +26,8 @@ import android.location.LocationListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Context;
+
+import java.sql.Array;
 import java.util.ArrayList;
 import android.support.v4.content.ContextCompat;
 import android.Manifest;
@@ -39,6 +42,7 @@ import java.util.Random;
  */
 public class Wheel extends AppCompatActivity {
     String loginUsername;
+    ArrayList<String> rArray = new ArrayList<>();
 
     private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean"};
 
@@ -101,12 +105,11 @@ public class Wheel extends AppCompatActivity {
     private int dialerHeight, dialerWidth;
 
     private Button getRestaurantsButton;
-    private String foodType;
 
     LocationManager lm;
     Location location;
-    double longitude;
-    double latitude;
+    double latitude = 40.7128;
+    double longitude = -74.0059;
 
     ProgressDialog progressDialog;
 
@@ -136,6 +139,7 @@ public class Wheel extends AppCompatActivity {
     APIStaticInformation apiKeys = new APIStaticInformation();
     Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
     String restaurantData = "chinese";
+    String parsedYelpData;
 
     ServerConnection server = new ServerConnection();
 
@@ -209,18 +213,29 @@ public class Wheel extends AppCompatActivity {
 
         setContentView(R.layout.activity_wheel);
 
+        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
+        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getRestaurant();
+            }
+        });
+
         progressDialog = new ProgressDialog(Wheel.this,
                 R.style.AppTheme_Dark_Dialog);
 
         // GPS Stuff
 
         lm =  (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
         if (lm != null) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                     && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 System.out.println("permission has been granted");
-                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListener);
-                location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                Criteria criteria = new Criteria();
+                String bestProvider = lm.getBestProvider(criteria, false);
+                lm.requestLocationUpdates(bestProvider, 100, 1, locationListener);
+                location = lm.getLastKnownLocation(bestProvider);
             } else {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -452,8 +467,11 @@ public class Wheel extends AppCompatActivity {
     }
 
     public void getRestaurant() {
-        longitude = location.getLongitude();
-        latitude = location.getLatitude();
+        if (location != null) {
+            System.out.println("the location was not null");
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
+        }
         new AsyncCaller().execute();
     }
 
@@ -472,8 +490,8 @@ public class Wheel extends AppCompatActivity {
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
             String response = yelp.search(restaurantData, latitude, longitude);
-            System.out.print("Yelp response:");
-            System.out.print(response + "\n");
+            System.out.println("Yelp response:");
+            System.out.println(response);
             // parse json to do something
             YelpParser yParser = new YelpParser();
             yParser.setResponse(response);
@@ -481,24 +499,21 @@ public class Wheel extends AppCompatActivity {
                 yParser.parseBusiness();
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
-                //Do whatever you want with the error, like throw a Toast error report
             }
             Bundle tempBundle = yParser.getYelpBundle();
             ArrayList<String> tempKeys = yParser.getBundleKeys();
             // Recreate necessary JSON String now
             JSONObject shorterResponse = new JSONObject();
-            String spaceDelimitedString = "select " + loginUsername;
+            String spaceDelimitedString = "select " + loginUsername + " ";
             int position = 0;
-            // name (no spaces) id category
-            // ^ format of the string that's sent to the server
             for (String key : tempKeys) {
                 try {
-                    System.out.println("key:" + key +" category:" + restaurantData);
-                    spaceDelimitedString = spaceDelimitedString + key + " " + position + " " + restaurantData;
+                    String rData = key + " " + position + " " + restaurantData.replaceAll("\\s+", "");
+                    rArray.add(position, rData);
                     if (position == tempKeys.size() - 1) {
 
                     } else {
-                        spaceDelimitedString = spaceDelimitedString + " ";
+                        spaceDelimitedString = spaceDelimitedString + rData + " ";
                     }
                     shorterResponse.put(key, JSONObject.wrap(tempBundle.get(key)));
                 } catch (JSONException e) {
@@ -508,8 +523,11 @@ public class Wheel extends AppCompatActivity {
             }
             System.out.println("new stuff sent to server: " + spaceDelimitedString);
             System.out.print("Our server repsonse:");
-            restaurantData = server.send(spaceDelimitedString);
-            System.out.print(restaurantData);
+            parsedYelpData = spaceDelimitedString;
+            String index = server.send(spaceDelimitedString);
+            rArray = tempKeys;
+            restaurantData = tempKeys.get(Integer.parseInt(index));
+            System.out.println("restaurant data: " + restaurantData);
             return null;
         }
 
@@ -518,9 +536,8 @@ public class Wheel extends AppCompatActivity {
             super.onPostExecute(result);
             progressDialog.dismiss();
 
-            //this method will be running on UI thread
-            // some type of alert to show that the querying and what not is done
+            // TODO Copy an's thing for choosing yes or no
+            // Send PARSEDYELPDATA, RESTAURANTDATA, LOGINUSERNAME, RESTAURANTNAME, RARRAY
         }
     }
-
 }

@@ -16,16 +16,16 @@
         "source": "/Users/webteam/Documents/CheeseWheel/app/src/main/res/drawable/cheese.png"
     },
     {
+        "merged": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/res/merged/debug/drawable/abc_seekbar_thumb_material.xml",
+        "source": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.2.1/res/drawable/abc_seekbar_thumb_material.xml"
+    },
+    {
         "merged": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_dark.xml",
         "source": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.2.1/res/drawable/abc_list_selector_background_transition_holo_dark.xml"
     },
     {
         "merged": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/res/merged/debug/drawable/logo.png",
         "source": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/res/drawable/logo.png"
-    },
-    {
-        "merged": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/res/merged/debug/drawable/abc_seekbar_thumb_material.xml",
-        "source": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.2.1/res/drawable/abc_seekbar_thumb_material.xml"
     },
     {
         "merged": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/res/merged/debug/drawable/cheese.png",
