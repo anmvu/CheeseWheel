@@ -1,36 +1,35 @@
 package cheesewheel.cheesewheel;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.os.AsyncTask;
-import android.support.v4.app.ActivityCompat;
-import android.location.Location;
-import android.location.LocationManager;
-import android.location.LocationListener;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.content.Context;
 
 import java.util.ArrayList;
-import android.support.v4.content.ContextCompat;
-import android.Manifest;
-import android.content.pm.PackageManager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -157,15 +156,16 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener 
         ration = 360/amount;
         float angle = 0;
         angles = new float[amount];
-        for (int i = 0; i < amount; i++){
+//        for (int i = 0; i < amount; i++){
             int index = rand.nextInt(cuisines.length);
             while(alreadyPlaced.contains(cuisines[index]) || rejected.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
             alreadyPlaced.add(cuisines[index]);
+            landed = cuisines[index];
             //System.out.println(angle);
             choices.put(cuisines[index], angle);
-            angles[i] = angle;
+//            angles[i] = angle;
             angle += ration;
-        }
+//        }
     }
 
     public void updateChoices(){
@@ -173,18 +173,19 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener 
         rejected.add(landed);
         int left = cuisines.length - alreadyPlaced.size()-rejected.size();
         choices.clear();
-        if(left < amount) angles = new float[amount];
-        while(left < amount) amount /=2;
+//        if(left < amount) angles = new float[amount];
+//        while(left < amount) amount /=2;
         ration = 360/amount;
         float angle = 0;
         int index = rand.nextInt(cuisines.length);
         while(alreadyPlaced.contains(cuisines[index]) || rejected.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
         alreadyPlaced.add(cuisines[index]);
-        for(int i = 0; i < alreadyPlaced.size(); i++){
-            choices.put(alreadyPlaced.get(i),angle);
-            angles[i] = angle;
-            angle += ration;
-        }
+        landed = cuisines[index];
+//        for(int i = 0; i < alreadyPlaced.size(); i++){
+//            choices.put(alreadyPlaced.get(i),angle);
+//            angles[i] = angle;
+//            angle += ration;
+//        }
     }
 
     public float getRotation(float angle, int amount){
@@ -394,28 +395,28 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener 
                 dialer.post(this);
             }
             else {
-                float[] vert = new float[9];
-                matrix.getValues(vert);
-                double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
-                System.out.println("before: " + bleh);
-                bleh += 90;
-                if (bleh < 0) bleh += 360;
-                if (bleh > 360) bleh -= 360;
-                System.out.println("angle: " + bleh);
-                double landedAngle = bleh;
-                float range = 360 / choices.size() / 2;
-                for (int i = 0; i < angles.length; i++) {
-                    if (bleh >= angles[i] - range && bleh < angles[i] + range) {
-                        landedAngle = angles[i];
-                    }
-                }
-
-                for (String o : choices.keySet()) {
-                    if (choices.get(o).equals((float) landedAngle)) {
-                        landed = o;
-                    }
-                }
-                System.out.println("landed at: " + landedAngle + " on " + landed);
+//                float[] vert = new float[9];
+//                matrix.getValues(vert);
+//                double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
+//                System.out.println("before: " + bleh);
+//                bleh += 90;
+//                if (bleh < 0) bleh += 360;
+//                if (bleh > 360) bleh -= 360;
+//                System.out.println("angle: " + bleh);
+//                double landedAngle = bleh;
+//                float range = 360 / choices.size() / 2;
+//                for (int i = 0; i < angles.length; i++) {
+//                    if (bleh >= angles[i] - range && bleh < angles[i] + range) {
+//                        landedAngle = angles[i];
+//                    }
+//                }
+//
+//                for (String o : choices.keySet()) {
+//                    if (choices.get(o).equals((float) landedAngle)) {
+//                        landed = o;
+//                    }
+//                }
+                //System.out.println("landed at: " + landedAngle + " on " + landed);
                 restaurantData = landed;
                 if (findViewById(R.id.fragment_container) != null) {
                     Choice choose = new Choice(landed,loginUsername);
