@@ -1,6 +1,7 @@
 package cheesewheel.cheesewheel;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -36,7 +37,6 @@ public class Choice extends Fragment{
 
         View view = inflater.inflate(R.layout.choice, container, false);
 
-
         if(landed == null){
             System.out.println("It's null!");
         }
@@ -52,11 +52,10 @@ public class Choice extends Fragment{
         final Button no = (Button)view.findViewById(R.id.No);
 
 
-
         yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onButtonSelect(true,null);
+                mCallback.onButtonSelect(true, null);
 
 
             }
