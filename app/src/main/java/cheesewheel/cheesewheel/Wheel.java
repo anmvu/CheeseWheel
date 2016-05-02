@@ -1,13 +1,22 @@
 package cheesewheel.cheesewheel;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -16,6 +25,9 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,16 +38,11 @@ import java.util.Random;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class Wheel extends AppCompatActivity implements ToActivity{
-    private static final String IP_ADDRESS = "172.16.21.188";
+public class Wheel extends AppCompatActivity implements Choice.FragmentListener{
+    String loginUsername;
+    ArrayList<String> rArray = new ArrayList<>();
 
-    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean",
-            "Malaysian","Greek","Turkish","Moroccon","Chicken","Burgers","Bar Food","Mexican","Cafes","Seafood","Pizza","Sushi","Soul","Korean",
-            "Vietnamese","Asian","Pastries","French","German","Vegetarian","Vegan","Jewish","Chinese-Islamic","Chinese-Mexican","Tex-Mex","Steak",
-            "Hot Pot","Indian"
-    };
-
-
+    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean"};
 
     private static Random rand = new Random();
 
@@ -51,9 +58,6 @@ public class Wheel extends AppCompatActivity implements ToActivity{
     private static String landed;
     private static int amount = 8;
 
-    private Wheel  activity= new Wheel();
-
-    private Choice flash;
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -99,7 +103,43 @@ public class Wheel extends AppCompatActivity implements ToActivity{
     private int dialerHeight, dialerWidth;
 
     private Button getRestaurantsButton;
-    private String foodType;
+
+    LocationManager lm;
+    Location location;
+    double latitude = 40.7128;
+    double longitude = -74.0059;
+
+    ProgressDialog progressDialog;
+
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
+
+    APIStaticInformation apiKeys = new APIStaticInformation();
+    Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
+    String restaurantData = "chinese";
+    String parsedYelpData;
+
+    ServerConnection server = new ServerConnection();
 
     private GestureDetector detector;
     private boolean[] quadrantTouched;
@@ -162,9 +202,46 @@ public class Wheel extends AppCompatActivity implements ToActivity{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        flash = new Choice();
+
+        //Uh... no clue
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            loginUsername = extras.getString("loginUsername");
+        }
+
+        System.out.println("loginusername: " + loginUsername);
 
         setContentView(R.layout.activity_wheel);
+
+//        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
+//        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                getRestaurant();
+//            }
+//        });
+
+        progressDialog = new ProgressDialog(Wheel.this,
+                R.style.AppTheme_Dark_Dialog);
+
+        // GPS Stuff
+
+        lm =  (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+        if (lm != null) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                System.out.println("permission has been granted");
+                Criteria criteria = new Criteria();
+                String bestProvider = lm.getBestProvider(criteria, false);
+                lm.requestLocationUpdates(bestProvider, 100, 1, locationListener);
+                location = lm.getLastKnownLocation(bestProvider);
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+            }
+        }
 
         // load the image only once
         if (imageOriginal == null) {
@@ -214,7 +291,7 @@ public class Wheel extends AppCompatActivity implements ToActivity{
         RelativeLayout myLayout = (RelativeLayout) findViewById(R.id.screen);
 
         //System.out.println("amount " + alreadyPlaced.size());
-
+        //what used to be the choices
 //        for (int i= 0; i < alreadyPlaced.size(); i++) {
 //            float angle = choices.get(alreadyPlaced.get(i));
 //            TextView text = new TextView(this);
@@ -240,6 +317,48 @@ public class Wheel extends AppCompatActivity implements ToActivity{
 //
 //        }
 
+        //check activity is using layout version
+//        if(findViewById(R.id.fragment_container) != null ){
+//            //if restored from previous state, don't do anything
+//            if (savedInstanceState != null){
+//                return;
+//            }
+//
+//            //crate new Fragment
+//            Choice choose = new Choice();
+//
+//            //started with special instructions from an intent, pass intent's extras to fragment as arguments
+//            Bundle bundle = new Bundle();
+//            bundle.putString(landed,landed);
+//            choose.setArguments(bundle);
+//            System.out.println(getIntent());
+//
+//
+//            //add fragmetn to fragment_container
+//            getSupportFragmentManager().beginTransaction().add(
+//                    R.id.fragment_container,choose).commit();
+//        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // do something map related
+                    System.out.println("needed to request the permissions");
+                    try {
+                        location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    } catch (SecurityException e) {
+                        System.out.println("it failed");
+                    }
+                } else {
+
+                }
+                return;
+            }
+        }
     }
 
     private class MyOnTouchListener implements View.OnTouchListener {
@@ -304,12 +423,11 @@ public class Wheel extends AppCompatActivity implements ToActivity{
 
         @Override
         public void run() {
+            System.out.println(velocity);
             if (Math.abs(velocity) > 5 && allowRotating) {
                 rotateDialer(velocity / 75);
                 velocity /= 1.0666F;
                 dialer.post(this);
-            }
-            else if(!allowRotating && velocity < 1) {
                 float[] vert = new float[9];
                 matrix.getValues(vert);
                 double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
@@ -332,15 +450,44 @@ public class Wheel extends AppCompatActivity implements ToActivity{
                     }
                 }
                 System.out.println("landed at: " + landedAngle + " on " + landed);
-                passToActivity(landed);
             }
-        }
-    }
+            else {
+                float[] vert = new float[9];
+                matrix.getValues(vert);
+                double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
+                System.out.println("before: " + bleh);
+                bleh += 90;
+                if (bleh < 0) bleh += 360;
+                if (bleh > 360) bleh -= 360;
+                System.out.println("angle: " + bleh);
+                double landedAngle = bleh;
+                float range = 360 / choices.size() / 2;
+                for (int i = 0; i < angles.length; i++) {
+                    if (bleh >= angles[i] - range && bleh < angles[i] + range) {
+                        landedAngle = angles[i];
+                    }
+                }
 
-    public void setFragment(Fragment frag){
-        FragmentManager fm = getFragmentManager();
-        if (fm.findFragmentById(R.id.chooseLanded) == null) {
-            fm.beginTransaction().add(R.id.chooseLanded, frag).commit();
+                for (String o : choices.keySet()) {
+                    if (choices.get(o).equals((float) landedAngle)) {
+                        landed = o;
+                    }
+                }
+                System.out.println("landed at: " + landedAngle + " on " + landed);
+                restaurantData = landed;
+                if (findViewById(R.id.fragment_container) != null) {
+
+                    //crate new Fragment
+                    Choice choose = new Choice(landed);
+                    //started with special instructions from an intent, pass intent's extras to fragment as arguments
+
+
+
+                    //add fragmetn to fragment_container
+                    getSupportFragmentManager().beginTransaction().replace(
+                            R.id.fragment_container, choose).commit();
+                }
+            }
         }
     }
 
@@ -378,12 +525,91 @@ public class Wheel extends AppCompatActivity implements ToActivity{
         dialer.setImageMatrix(matrix);
     }
 
+    public void getRestaurant() {
+        if (location != null) {
+            System.out.println("the location was not null");
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
+        }
+        new AsyncCaller().execute();
+    }
 
+    private class AsyncCaller extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected  void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.setIndeterminate(true);
+            progressDialog.setMessage("Determining Restaurants...");
+            progressDialog.show();
+            // Loading screen or something
+        }
+
+        @Override
+        protected Void doInBackground(Void...params) {
+            //this method will be running on background thread so don't update UI frome here
+            //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
+            String response = yelp.search(restaurantData, latitude, longitude);
+            System.out.println("Yelp response:");
+            System.out.println(response);
+            // parse json to do something
+            YelpParser yParser = new YelpParser();
+            yParser.setResponse(response);
+            try {
+                yParser.parseBusiness();
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+            }
+            Bundle tempBundle = yParser.getYelpBundle();
+            ArrayList<String> tempKeys = yParser.getBundleKeys();
+            // Recreate necessary JSON String now
+            JSONObject shorterResponse = new JSONObject();
+            String spaceDelimitedString = "select " + loginUsername + " ";
+            int position = 0;
+            for (String key : tempKeys) {
+                try {
+                    String rData = key + " " + position + " " + restaurantData.replaceAll("\\s+", "");
+                    rArray.add(position, rData);
+                    if (position == tempKeys.size() - 1) {
+
+                    } else {
+                        spaceDelimitedString = spaceDelimitedString + rData + " ";
+                    }
+                    shorterResponse.put(key, JSONObject.wrap(tempBundle.get(key)));
+                } catch (JSONException e) {
+                    // Some kind of error handling here
+                }
+                position = position + 1;
+            }
+            System.out.println("new stuff sent to server: " + spaceDelimitedString);
+            System.out.print("Our server repsonse:");
+            parsedYelpData = spaceDelimitedString;
+            String index = server.send(spaceDelimitedString);
+            rArray = tempKeys;
+            restaurantData = tempKeys.get(Integer.parseInt(index));
+            System.out.println("restaurant data: " + restaurantData);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            progressDialog.dismiss();
+
+            // TODO Copy an's thing for choosing yes or no
+            // Send PARSEDYELPDATA, RESTAURANTDATA, LOGINUSERNAME, RESTAURANTNAME, RARRAY
+        }
+    }
 
     @Override
-    public void passToActivity(String choice){
-        //Do something with the position value passed back
-
+    public void onButtonSelect(boolean b){
+        if (b){
+            System.out.println("yes");
+        }
+        else{
+            alreadyPlaced.remove(landed);
+            rejected.add(landed);
+            System.out.println("no");
+        }
     }
-}
 
+}

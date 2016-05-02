@@ -1,82 +1,89 @@
 package cheesewheel.cheesewheel;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * Created by annie on 5/1/16.
  */
 
 
-public class Choice extends Fragment implements ToFragment {
-    Activity activity;
-    public static String landed;
+public class Choice extends Fragment{
 
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-//                             Bundle savedInstanceState) {
-//        return inflater.inflate(R.layout.choice, container, false);
-//
-//    }
-//
-//    @Override
-//    public void passToFragment(String s){
-//        landed = s;
-//
-//    }
+    FragmentListener mCallback;
+    String landed;
 
-    private IFragmentToActivity mCallback;
-    private Button btnFtoA;
-    private Button btnFtoF;
+    public interface FragmentListener{
+        public void onButtonSelect(boolean b);
+    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.tab_fragment_1, container, false);
-        btnFtoA = (Button) view.findViewById(R.id.button);
-        btnFtoF = (Button) view.findViewById(R.id.button2);
-        btnFtoA.setOnClickListener(this);
-        btnFtoF.setOnClickListener(this);
+    public Choice(){}
+
+    public Choice(String s){
+
+        System.out.println(s);
+        landed = s;
+    }
+
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+
+        View view = inflater.inflate(R.layout.choice,container,false);
+
+
+        if(landed == null){
+            System.out.println("It's null!");
+        }
+        else {
+            System.out.println("bundle: " + landed);
+            String prompt = landed;
+            prompt += "?";
+            TextView text = (TextView) view.findViewById(R.id.landed_on);
+            text.setText(prompt);
+        }
+
+        final Button yes = (Button)view.findViewById(R.id.yes);
+        final Button no = (Button)view.findViewById(R.id.No);
+
+        yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onButtonSelect(true);
+            }
+        });
+        no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onButtonSelect(false);
+            }
+        });
+
+
         return view;
     }
 
+
+
     @Override
-    public void onAttach(Context context) {
+    public void setArguments(Bundle b){
+
+    }
+
+    public void onAttach(Context context){
         super.onAttach(context);
-        try {
-            mCallback = (IFragmentToActivity) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement IFragmentToActivity");
+
+        try{
+            mCallback = (FragmentListener) context;
+
+        }catch(ClassCastException e){
+            throw new ClassCastException(context.toString() + " must implement FragmentListener");
         }
     }
 
-    @Override
-    public void onDetach() {
-        mCallback = null;
-        super.onDetach();
-    }
-
-    public void onRefresh() {
-        Toast.makeText(getActivity(), "Fragment 1: Refresh called.",
-                Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.button:
-                mCallback.showToast("Hello from Fragment 1");
-                break;
-
-            case R.id.button2:
-                mCallback.communicateToFragment2();
-                break;
-        }
-    }
-}
 
 }
