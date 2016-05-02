@@ -42,7 +42,11 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener{
     String loginUsername;
     ArrayList<String> rArray = new ArrayList<>();
 
-    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean"};
+    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean",
+            "Malaysian","Greek","Turkish","Moroccon","Chicken","Burgers","Bar Food","Mexican","Cafes","Seafood","Pizza","Sushi","Soul","Korean",
+            "Vietnamese","Asian","Pastries","French","German","Vegetarian","Vegan","Jewish","Chinese-Islamic","Chinese-Mexican","Tex-Mex","Steak",
+            "Hot Pot","Indian"
+    };
 
     private static Random rand = new Random();
 
@@ -145,6 +149,10 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener{
     private boolean[] quadrantTouched;
     private boolean allowRotating;
 
+
+
+    //{French=270.0, Chinese=225.0, Soul=0.0, Chinese-Mexican=0.0, Indian=315.0, Greek=225.0, Mexican=45.0, Mediterranean=135.0, Thai=315.0, German=270.0, BBQ=180.0,
+        //    Malaysian=180.0, Jewish=135.0, Hot Pot=90.0, Burgers=90.0, Japanese=45.0}
     public void getChoices(){
         int left = cuisines.length - alreadyPlaced.size()-rejected.size();
         //System.out.println("left amount: " + left + " cuisines: " + cuisines.length + " already: " + alreadyPlaced.size() + " rejected: " + rejected.size() );
@@ -155,7 +163,7 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener{
         angles = new float[amount];
         for (int i = 0; i < amount; i++){
             int index = rand.nextInt(cuisines.length);
-            while(alreadyPlaced.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
+            while(alreadyPlaced.contains(cuisines[index]) || rejected.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
             alreadyPlaced.add(cuisines[index]);
             //System.out.println(angle);
             choices.put(cuisines[index], angle);
@@ -163,6 +171,26 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener{
             angle += ration;
         }
     }
+
+    public void updateChoices(){
+        alreadyPlaced.remove(landed);
+        rejected.add(landed);
+        int left = cuisines.length - alreadyPlaced.size()-rejected.size();
+        choices.clear();
+        if(left < amount) angles = new float[amount];
+        while(left < amount) amount /=2;
+        ration = 360/amount;
+        float angle = 0;
+        int index = rand.nextInt(cuisines.length);
+        while(alreadyPlaced.contains(cuisines[index]) || rejected.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
+        alreadyPlaced.add(cuisines[index]);
+        for(int i = 0; i < alreadyPlaced.size(); i++){
+            choices.put(alreadyPlaced.get(i),angle);
+            angles[i] = angle;
+            angle += ration;
+        }
+    }
+
 
     public float getRotation(float angle, int amount){
         float rotate = angle;
@@ -428,28 +456,6 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener{
                 rotateDialer(velocity / 75);
                 velocity /= 1.0666F;
                 dialer.post(this);
-                float[] vert = new float[9];
-                matrix.getValues(vert);
-                double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
-                System.out.println("before: " + bleh);
-                bleh += 90;
-                if (bleh < 0) bleh += 360;
-                if (bleh > 360) bleh -= 360;
-                System.out.println("angle: " + bleh);
-                double landedAngle = bleh;
-                float range = 360 / choices.size() / 2;
-                for (int i = 0; i < angles.length; i++) {
-                    if (bleh >= angles[i] - range && bleh < angles[i] + range) {
-                        landedAngle = angles[i];
-                    }
-                }
-
-                for (String o : choices.keySet()) {
-                    if (choices.get(o).equals((float) landedAngle)) {
-                        landed = o;
-                    }
-                }
-                System.out.println("landed at: " + landedAngle + " on " + landed);
             }
             else {
                 float[] vert = new float[9];
@@ -601,14 +607,17 @@ public class Wheel extends AppCompatActivity implements Choice.FragmentListener{
     }
 
     @Override
-    public void onButtonSelect(boolean b){
+    public void onButtonSelect(boolean b, Choice c){
         if (b){
             System.out.println("yes");
         }
         else{
-            alreadyPlaced.remove(landed);
-            rejected.add(landed);
+            getSupportFragmentManager().beginTransaction().remove(c).commit();
+            updateChoices();
+            for(String placed : alreadyPlaced)System.out.println(placed);
+             System.out.println(choices);
             System.out.println("no");
+
         }
     }
 

@@ -18,9 +18,10 @@ public class Choice extends Fragment{
 
     FragmentListener mCallback;
     String landed;
+    Choice c = this;
 
     public interface FragmentListener{
-        public void onButtonSelect(boolean b);
+        public void onButtonSelect(boolean b,Choice c);
     }
 
     public Choice(){}
@@ -33,7 +34,7 @@ public class Choice extends Fragment{
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
 
-        View view = inflater.inflate(R.layout.choice,container,false);
+        View view = inflater.inflate(R.layout.choice, container, false);
 
 
         if(landed == null){
@@ -50,16 +51,20 @@ public class Choice extends Fragment{
         final Button yes = (Button)view.findViewById(R.id.yes);
         final Button no = (Button)view.findViewById(R.id.No);
 
+
+
         yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onButtonSelect(true);
+                mCallback.onButtonSelect(true,null);
+
+
             }
         });
         no.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onButtonSelect(false);
+                mCallback.onButtonSelect(false,c);
             }
         });
 
