@@ -70,7 +70,6 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Wheel.class);
-                intent.putExtra("loginUsername", loginUsername);
                 startActivity(intent);
             }
         });
@@ -96,25 +95,6 @@ public class Login extends AppCompatActivity {
 
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == REQUEST_SIGNUP) {
-//            if (resultCode == RESULT_OK) {
-//
-//                // TODO: Implement successful signup logic here
-//                // By default we just finish the Activity and log them in automatically
-//                String loginStr = "login " + _emailText.getText().toString() + " " + _passwordText.getText().toString();
-//                String success = serverConnection.send(loginStr);
-//                if (success == "true") {
-//                    loginSuccess = true;
-//                } else {
-//                    loginSuccess = false;
-//                }
-//                this.finish();
-//            }
-//        }
-//    }
-
     @Override
     public void onBackPressed() {
         // disable going back to the MainActivity
@@ -139,13 +119,6 @@ public class Login extends AppCompatActivity {
 
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
-
-//        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-//            _emailText.setError("enter a valid email address");
-//            valid = false;
-//        } else {
-//            _emailText.setError(null);
-//        }
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
             _passwordText.setError("between 4 and 10 alphanumeric characters");

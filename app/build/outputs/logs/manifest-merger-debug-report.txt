@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:2:1-31:12
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:2:1-32:12
 	xmlns:android
 		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:2:11-69
 	package
@@ -25,8 +25,12 @@ uses-permission#android.permission.ACCESS_COARSE_LOCATION
 ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:6:5-81
 	android:name
 		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:6:22-78
+uses-permission#android.permission.CALL_PHONE
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:7:5-69
+	android:name
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:7:22-66
 application
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:7:5-29:19
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:8:5-30:19
 MERGED from [com.android.support:appcompat-v7:23.2.1] /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.2.1/AndroidManifest.xml:25:5-20
 MERGED from [com.android.support:support-v4:23.2.1] /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.2.1/AndroidManifest.xml:22:5-20
 MERGED from [com.android.support:animated-vector-drawable:23.2.1] /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/23.2.1/AndroidManifest.xml:7:5-20
@@ -53,53 +57,53 @@ MERGED from [com.android.support:support-vector-drawable:23.2.1] /Users/xflyter/
 MERGED from [com.android.support:support-v4:23.2.1] /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.2.1/AndroidManifest.xml:22:5-20
 MERGED from [com.android.support:support-v4:23.2.1] /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.2.1/AndroidManifest.xml:22:5-20
 	android:supportsRtl
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:11:9-35
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:12:9-35
 	android:label
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:10:9-41
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:11:9-41
 	android:allowBackup
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:8:9-35
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:9:9-35
 	android:icon
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:9:9-43
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:10:9-43
 	android:theme
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:12:9-40
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:13:9-40
 activity#cheesewheel.cheesewheel.Wheel
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:13:9-18:20
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:14:9-19:20
 	android:label
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:16:13-45
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:17:13-45
 	android:configChanges
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:15:13-74
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:16:13-74
 	android:theme
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:17:13-51
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:18:13-51
 	android:name
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:14:13-33
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:15:13-33
 activity#cheesewheel.cheesewheel.Login
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:19:9-26:20
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:20:9-27:20
 	android:theme
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:21:13-49
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:22:13-49
 	android:name
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:20:13-33
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:21:13-33
 intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:22:13-25:29
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:23:13-26:29
 action#android.intent.action.MAIN
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:23:17-69
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:24:17-69
 	android:name
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:23:25-66
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:24:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:24:17-77
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:25:17-77
 	android:name
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:24:27-74
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:25:27-74
 activity#cheesewheel.cheesewheel.SignUp
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:27:9-80
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:28:9-80
 	android:theme
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:27:41-77
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:28:41-77
 	android:name
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:27:19-40
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:28:19-40
 activity#cheesewheel.cheesewheel.RestaurantViewer
-ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:28:9-90
+ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:29:9-90
 	android:theme
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:28:51-87
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:29:51-87
 	android:name
-		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:28:19-50
+		ADDED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml:29:19-50
 uses-sdk
 INJECTED from /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 MERGED from [com.android.support:appcompat-v7:23.2.1] /Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.2.1/AndroidManifest.xml:21:5-23:78

@@ -9,10 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import org.json.JSONObject;
-
+import android.content.Intent;
+import android.net.Uri;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by xflyter on 5/1/16.
@@ -23,8 +24,11 @@ public class RestaurantViewer extends AppCompatActivity {
     String parsedYelpData;
     String restaurantData;
     int rIndex;
+    double latitude;
+    double longitude;
     ArrayList<String> rArray;
     ProgressDialog progressDialog;
+    Bundle bundle;
 
     private Button yesButton;
     private Button noButton;
@@ -68,6 +72,17 @@ public class RestaurantViewer extends AppCompatActivity {
         }
     };
 
+    public String getSpacedRName(String data) {
+        String temp = data.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2");
+        return temp;
+    }
+
+    public String getPhoneNumber(String data) {
+        String phoneNum = bundle.getString(data);
+        phoneNum = phoneNum.substring(0, phoneNum.indexOf(","));
+        return phoneNum;
+    }
+
     public void reject() {
         System.out.println("restaurantData: " + restaurantData);
         String rname = restaurantData;
@@ -78,14 +93,17 @@ public class RestaurantViewer extends AppCompatActivity {
     }
 
     public String getAddress(String data) {
-        System.out.println("data: " + data);
-        return "";
+        String temp = bundle.getString(data);
+        System.out.println("string got from bundle:" + temp);
+        temp = temp.substring(temp.indexOf("[") + 1);
+        temp = temp.substring(0, temp.indexOf("]"));
+        return temp;
     }
 
     public void sendNew() {
         String index = serverConnection.send(parsedYelpData);
+        rIndex = Integer.parseInt(index);
         restaurantData = rArray.get(Integer.parseInt(index));
-        // rest data should contain the location and all that
     }
 
     public void onCreate(Bundle savedInstanceState) {
@@ -97,6 +115,9 @@ public class RestaurantViewer extends AppCompatActivity {
             restaurantData = extras.getString("restaurantData");
             rArray = extras.getStringArrayList("rArray");
             rIndex = extras.getInt("rIndex");
+            bundle = extras.getBundle("bundle");
+            latitude = extras.getDouble("latitude");
+            longitude = extras.getDouble("longitude");
         }
         progressDialog = new ProgressDialog(RestaurantViewer.this,
                 R.style.AppTheme_Dark_Dialog);
@@ -105,9 +126,22 @@ public class RestaurantViewer extends AppCompatActivity {
 
         // Set label stuff
         TextView rNameLabel = (TextView)findViewById(R.id.restaurantName);
-        rNameLabel.setText(restaurantData);
+        rNameLabel.setText(getSpacedRName(restaurantData));
         TextView rAddressLabel = (TextView)findViewById(R.id.restaurantAddress);
         rAddressLabel.setText(getAddress(rArray.get(rIndex)));
+        final TextView rPhoneLabel = (TextView)findViewById(R.id.rPhone);
+        rPhoneLabel.setText(getPhoneNumber(rArray.get(rIndex)));
+
+        rPhoneLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String number = rPhoneLabel.getText().toString().replaceAll("-", "");
+                number = number.replace("+", "");
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                callIntent.setData(Uri.parse("tel:"+number));
+                startActivity(callIntent);
+            }
+        });
 
         // Button stuff
         this.yesButton = (Button)this.findViewById(R.id.Yes);
@@ -128,7 +162,9 @@ public class RestaurantViewer extends AppCompatActivity {
     }
 
     public void didTapYes() {
-
+        String uri = String.format(Locale.ENGLISH, "geo:0,0?q=" + restaurantData + "+,+" + (getAddress(rArray.get(rIndex))).replace("\\s+", "+"));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+        startActivity(intent);
     }
 
     public void didTapNo() {
@@ -162,6 +198,12 @@ public class RestaurantViewer extends AppCompatActivity {
             super.onPostExecute(result);
             progressDialog.dismiss();
 
+            TextView rNameLabel = (TextView)findViewById(R.id.restaurantName);
+            rNameLabel.setText(getSpacedRName(restaurantData));
+            TextView rAddressLabel = (TextView)findViewById(R.id.restaurantAddress);
+            rAddressLabel.setText(getAddress(rArray.get(rIndex)));
+            TextView rPhoneLabel = (TextView)findViewById(R.id.rPhone);
+            rPhoneLabel.setText(getPhoneNumber(rArray.get(rIndex)));
         }
     }
 }

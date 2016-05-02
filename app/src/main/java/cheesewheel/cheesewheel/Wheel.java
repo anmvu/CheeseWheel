@@ -15,7 +15,6 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -28,7 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Context;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import android.support.v4.content.ContextCompat;
 import android.Manifest;
@@ -41,9 +39,10 @@ import java.util.Random;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class Wheel extends AppCompatActivity {
-    String loginUsername;
+public class Wheel extends AppCompatActivity implements Choice.FragmentListener {
+    String loginUsername = "";
     ArrayList<String> rArray = new ArrayList<>();
+    Bundle yelpBundle;
 
     private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean",
             "Malaysian","Greek","Turkish","Moroccon","Chicken","Burgers","Bar Food","Mexican","Cafes","Seafood","Pizza","Sushi","Soul","Korean",
@@ -108,8 +107,6 @@ public class Wheel extends AppCompatActivity {
     private ImageView dialer;
     private int dialerHeight, dialerWidth;
 
-    private Button getRestaurantsButton;
-
     LocationManager lm;
     Location location;
     double latitude = 40.7128;
@@ -162,10 +159,29 @@ public class Wheel extends AppCompatActivity {
         angles = new float[amount];
         for (int i = 0; i < amount; i++){
             int index = rand.nextInt(cuisines.length);
-            while(alreadyPlaced.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
+            while(alreadyPlaced.contains(cuisines[index]) || rejected.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
             alreadyPlaced.add(cuisines[index]);
             //System.out.println(angle);
             choices.put(cuisines[index], angle);
+            angles[i] = angle;
+            angle += ration;
+        }
+    }
+
+    public void updateChoices(){
+        alreadyPlaced.remove(landed);
+        rejected.add(landed);
+        int left = cuisines.length - alreadyPlaced.size()-rejected.size();
+        choices.clear();
+        if(left < amount) angles = new float[amount];
+        while(left < amount) amount /=2;
+        ration = 360/amount;
+        float angle = 0;
+        int index = rand.nextInt(cuisines.length);
+        while(alreadyPlaced.contains(cuisines[index]) || rejected.contains(cuisines[index])){index = rand.nextInt(cuisines.length);}
+        alreadyPlaced.add(cuisines[index]);
+        for(int i = 0; i < alreadyPlaced.size(); i++){
+            choices.put(alreadyPlaced.get(i),angle);
             angles[i] = angle;
             angle += ration;
         }
@@ -217,14 +233,6 @@ public class Wheel extends AppCompatActivity {
         System.out.println("loginusername: " + loginUsername);
 
         setContentView(R.layout.activity_wheel);
-
-        this.getRestaurantsButton = (Button)this.findViewById(R.id.getRestaurants);
-        this.getRestaurantsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getRestaurant();
-            }
-        });
 
         progressDialog = new ProgressDialog(Wheel.this,
                 R.style.AppTheme_Dark_Dialog);
@@ -294,33 +302,6 @@ public class Wheel extends AppCompatActivity {
         rejected = new ArrayList<String>();
         getChoices();
         RelativeLayout myLayout = (RelativeLayout) findViewById(R.id.screen);
-
-        //System.out.println("amount " + alreadyPlaced.size());
-
-        for (int i= 0; i < alreadyPlaced.size(); i++) {
-            float angle = choices.get(alreadyPlaced.get(i));
-            TextView text = new TextView(this);
-            text.setText(alreadyPlaced.get(i));
-//            text.setText(alreadyPlaced.get(i));
-            text.setLayoutParams(new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.MATCH_PARENT,
-                    RelativeLayout.LayoutParams.MATCH_PARENT));
-            text.setGravity(Gravity.CENTER);
-            int id = View.generateViewId();
-            System.out.println(alreadyPlaced.get(i));
-            float rotate = getRotation(angle, amount);
-            text.setRotation(rotate);
-
-            text.setTranslationX(300 * (float) Math.cos(Math.toRadians(angle)));
-            text.setTranslationY(-300 * (float) Math.sin(Math.toRadians(angle)));
-            //System.out.println(alreadyPlaced.get(i) + " before: " + angle + " X: " + text.getX() + " Y: " + text.getY());
-            text.setTextSize(17.0f);
-            text.setAllCaps(true);
-
-            //System.out.println(alreadyPlaced.get(i) + " after: " + angle);
-            myLayout.addView(text);
-
-        }
 
     }
 
@@ -406,34 +387,42 @@ public class Wheel extends AppCompatActivity {
 
         @Override
         public void run() {
+            System.out.println(velocity);
             if (Math.abs(velocity) > 5 && allowRotating) {
                 rotateDialer(velocity / 75);
                 velocity /= 1.0666F;
                 dialer.post(this);
             }
-            float[] vert = new float[9];
-            matrix.getValues(vert) ;
-            double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
-            System.out.println("before: " + bleh);
-            bleh += 90;
-            if(bleh < 0) bleh+=360;
-            if(bleh > 360) bleh-=360;
-            System.out.println("angle: " + bleh);
-            double landedAngle = bleh;
-            float range = 360/choices.size()/2;
-            for(int i = 0; i < angles.length; i++){
-                if (bleh >= angles[i]-range && bleh < angles[i]+range){
-                    landedAngle = angles[i];
+            else {
+                float[] vert = new float[9];
+                matrix.getValues(vert);
+                double bleh = Math.round(Math.atan2(vert[matrix.MSKEW_X], vert[matrix.MSCALE_X]) * (180 / Math.PI));
+                System.out.println("before: " + bleh);
+                bleh += 90;
+                if (bleh < 0) bleh += 360;
+                if (bleh > 360) bleh -= 360;
+                System.out.println("angle: " + bleh);
+                double landedAngle = bleh;
+                float range = 360 / choices.size() / 2;
+                for (int i = 0; i < angles.length; i++) {
+                    if (bleh >= angles[i] - range && bleh < angles[i] + range) {
+                        landedAngle = angles[i];
+                    }
                 }
-            }
 
-            for(String o : choices.keySet()){
-                if(choices.get(o).equals((float)landedAngle)) {
-                    landed = o;
+                for (String o : choices.keySet()) {
+                    if (choices.get(o).equals((float) landedAngle)) {
+                        landed = o;
+                    }
+                }
+                System.out.println("landed at: " + landedAngle + " on " + landed);
+                restaurantData = landed;
+                if (findViewById(R.id.fragment_container) != null) {
+                    Choice choose = new Choice(landed,loginUsername);
+                    getSupportFragmentManager().beginTransaction().replace(
+                            R.id.fragment_container, choose).commit();
                 }
             }
-            System.out.println("landed at: " + landedAngle + " on " + landed);
-            restaurantData = landed;
         }
     }
 
@@ -505,7 +494,7 @@ public class Wheel extends AppCompatActivity {
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
             }
-            Bundle tempBundle = yParser.getYelpBundle();
+            yelpBundle = yParser.getYelpBundle();
             ArrayList<String> tempKeys = yParser.getBundleKeys();
             // Recreate necessary JSON String now
             JSONObject shorterResponse = new JSONObject();
@@ -520,7 +509,7 @@ public class Wheel extends AppCompatActivity {
                     } else {
                         spaceDelimitedString = spaceDelimitedString + rData + " ";
                     }
-                    shorterResponse.put(key, JSONObject.wrap(tempBundle.get(key)));
+                    shorterResponse.put(key, JSONObject.wrap(yelpBundle.get(key)));
                 } catch (JSONException e) {
                     // Some kind of error handling here
                 }
@@ -530,6 +519,7 @@ public class Wheel extends AppCompatActivity {
             System.out.print("Our server repsonse:");
             parsedYelpData = spaceDelimitedString;
             String index = server.send(spaceDelimitedString);
+            System.out.println("index: " + index);
             rArray = tempKeys;
             restaurantData = tempKeys.get(Integer.parseInt(index));
             rIndex = Integer.parseInt(index);
@@ -547,9 +537,21 @@ public class Wheel extends AppCompatActivity {
             intent.putExtra("loginUsername", loginUsername);
             intent.putExtra("rArray", rArray);
             intent.putExtra("rIndex", rIndex);
+            intent.putExtra("bundle", yelpBundle);
+            intent.putExtra("latitude", latitude);
+            intent.putExtra("longitude", longitude);
             startActivity(intent);
-            // TODO Copy an's thing for choosing yes or no
-            // Send PARSEDYELPDATA, RESTAURANTDATA, LOGINUSERNAME, RARRAY
+        }
+    }
+
+    @Override
+    public void onButtonSelect(boolean b, Choice c){
+        if (b){
+            getRestaurant();
+        }
+        else {
+            getSupportFragmentManager().beginTransaction().remove(c).commit();
+            updateChoices();
         }
     }
 }
