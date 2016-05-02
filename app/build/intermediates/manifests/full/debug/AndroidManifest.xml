@@ -36,6 +36,9 @@
         <activity
             android:name="cheesewheel.cheesewheel.SignUp"
             android:theme="@style/AppTheme.Dark" />
+        <activity
+            android:name="cheesewheel.cheesewheel.RestaurantViewer"
+            android:theme="@style/AppTheme.Dark" />
     </application>
 
 </manifest>

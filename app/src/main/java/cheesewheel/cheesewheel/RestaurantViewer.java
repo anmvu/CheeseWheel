@@ -7,6 +7,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import org.json.JSONObject;
+
 
 import java.util.ArrayList;
 
@@ -18,8 +22,12 @@ public class RestaurantViewer extends AppCompatActivity {
     String loginUsername;
     String parsedYelpData;
     String restaurantData;
+    int rIndex;
     ArrayList<String> rArray;
     ProgressDialog progressDialog;
+
+    private Button yesButton;
+    private Button noButton;
 
     String currentFunction = "reject";
 
@@ -60,20 +68,18 @@ public class RestaurantViewer extends AppCompatActivity {
         }
     };
 
-    public String getRestaurantNameFromData(String data) {
-        String rname = "";
-        int spacePos = data.indexOf(" ");
-        if (spacePos > 0) {
-            rname = data.substring(0, spacePos - 1);
-        }
-        return rname;
+    public void reject() {
+        System.out.println("restaurantData: " + restaurantData);
+        String rname = restaurantData;
+        String sendToServer = "rejectrest " + loginUsername + " " + rname;
+        String success = serverConnection.send(sendToServer);
+        System.out.println("Success: " + success);
+        sendNew();
     }
 
-    public void reject() {
-        String rname = getRestaurantNameFromData(restaurantData);
-        String sendToServer = "rejectrest " + loginUsername + " " + rname;
-        serverConnection.send(sendToServer);
-        sendNew();
+    public String getAddress(String data) {
+        System.out.println("data: " + data);
+        return "";
     }
 
     public void sendNew() {
@@ -90,11 +96,43 @@ public class RestaurantViewer extends AppCompatActivity {
             parsedYelpData = extras.getString("parsedYelpData");
             restaurantData = extras.getString("restaurantData");
             rArray = extras.getStringArrayList("rArray");
+            rIndex = extras.getInt("rIndex");
         }
         progressDialog = new ProgressDialog(RestaurantViewer.this,
                 R.style.AppTheme_Dark_Dialog);
 
+        setContentView(R.layout.restaurant_viewer);
 
+        // Set label stuff
+        TextView rNameLabel = (TextView)findViewById(R.id.restaurantName);
+        rNameLabel.setText(restaurantData);
+        TextView rAddressLabel = (TextView)findViewById(R.id.restaurantAddress);
+        rAddressLabel.setText(getAddress(rArray.get(rIndex)));
+
+        // Button stuff
+        this.yesButton = (Button)this.findViewById(R.id.Yes);
+        this.yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                didTapYes();
+            }
+        });
+
+        this.noButton = (Button)this.findViewById(R.id.No);
+        this.noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                didTapNo();
+            }
+        });
+    }
+
+    public void didTapYes() {
+
+    }
+
+    public void didTapNo() {
+        new NewRestaurantCaller().execute();
     }
 
     private class NewRestaurantCaller extends AsyncTask<Void, Void, Void> {
@@ -102,7 +140,11 @@ public class RestaurantViewer extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             progressDialog.setIndeterminate(true);
-            progressDialog.setMessage("Determining New Restaurants...");
+            if (currentFunction == "reject") {
+                progressDialog.setMessage("Determining New Restaurant...");
+            } else {
+                progressDialog.setMessage("stuff...");
+            }
             progressDialog.show();
             // Loading screen or something
         }

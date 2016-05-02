@@ -25,6 +25,7 @@
             </intent-filter>
         </activity>
         <activity android:name="SignUp" android:theme="@style/AppTheme.Dark" />
+        <activity android:name="RestaurantViewer" android:theme="@style/AppTheme.Dark" />
     </application>
 
 </manifest>

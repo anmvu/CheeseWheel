@@ -591,6 +591,8 @@ int drawable design_snackbar_background 0x7f02004d
 int drawable fork 0x7f02004e
 int drawable logo 0x7f02004f
 int drawable notification_template_icon_bg 0x7f020050
+int id No 0x7f0c0088
+int id Yes 0x7f0c0089
 int id action0 0x7f0c0079
 int id action_bar 0x7f0c005a
 int id action_bar_activity_content 0x7f0c0000
@@ -612,7 +614,7 @@ int id always 0x7f0c0033
 int id beginning 0x7f0c0031
 int id bottom 0x7f0c001d
 int id btn_login 0x7f0c0076
-int id btn_signup 0x7f0c0087
+int id btn_signup 0x7f0c008b
 int id buttonPanel 0x7f0c0044
 int id cancel_action 0x7f0c007a
 int id center 0x7f0c001e
@@ -654,7 +656,7 @@ int id ifRoom 0x7f0c0035
 int id image 0x7f0c003f
 int id imageView_ring 0x7f0c006a
 int id info 0x7f0c0084
-int id input_email 0x7f0c0086
+int id input_email 0x7f0c008a
 int id input_name 0x7f0c0074
 int id input_password 0x7f0c0075
 int id inside_imageview 0x7f0c0069
@@ -662,7 +664,7 @@ int id item_touch_helper_previous_elevation 0x7f0c0005
 int id left 0x7f0c0023
 int id line1 0x7f0c007e
 int id line3 0x7f0c0082
-int id link_login 0x7f0c0088
+int id link_login 0x7f0c008c
 int id link_signup 0x7f0c0077
 int id listMode 0x7f0c000b
 int id list_item 0x7f0c0041
@@ -681,6 +683,8 @@ int id pin 0x7f0c001c
 int id progress_circular 0x7f0c0006
 int id progress_horizontal 0x7f0c0007
 int id radio 0x7f0c0054
+int id restaurantAddress 0x7f0c0087
+int id restaurantName 0x7f0c0086
 int id right 0x7f0c0024
 int id screen 0x7f0c0028
 int id scroll 0x7f0c0018
@@ -782,11 +786,12 @@ int layout notification_template_lines 0x7f04002b
 int layout notification_template_media 0x7f04002c
 int layout notification_template_part_chronometer 0x7f04002d
 int layout notification_template_part_time 0x7f04002e
-int layout select_dialog_item_material 0x7f04002f
-int layout select_dialog_multichoice_material 0x7f040030
-int layout select_dialog_singlechoice_material 0x7f040031
-int layout signup 0x7f040032
-int layout support_simple_spinner_dropdown_item 0x7f040033
+int layout restaurant_viewer 0x7f04002f
+int layout select_dialog_item_material 0x7f040030
+int layout select_dialog_multichoice_material 0x7f040031
+int layout select_dialog_singlechoice_material 0x7f040032
+int layout signup 0x7f040033
+int layout support_simple_spinner_dropdown_item 0x7f040034
 int mipmap ic_launcher 0x7f030000
 int string abc_action_bar_home_description 0x7f060000
 int string abc_action_bar_home_description_format 0x7f060001

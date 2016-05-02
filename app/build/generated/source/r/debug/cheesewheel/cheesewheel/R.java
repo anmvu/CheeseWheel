@@ -2296,6 +2296,8 @@ containing a value of this type.
         public static final int notification_template_icon_bg=0x7f020050;
     }
     public static final class id {
+        public static final int No=0x7f0c0088;
+        public static final int Yes=0x7f0c0089;
         public static final int action0=0x7f0c0079;
         public static final int action_bar=0x7f0c005a;
         public static final int action_bar_activity_content=0x7f0c0000;
@@ -2317,7 +2319,7 @@ containing a value of this type.
         public static final int beginning=0x7f0c0031;
         public static final int bottom=0x7f0c001d;
         public static final int btn_login=0x7f0c0076;
-        public static final int btn_signup=0x7f0c0087;
+        public static final int btn_signup=0x7f0c008b;
         public static final int buttonPanel=0x7f0c0044;
         public static final int cancel_action=0x7f0c007a;
         public static final int center=0x7f0c001e;
@@ -2359,7 +2361,7 @@ containing a value of this type.
         public static final int image=0x7f0c003f;
         public static final int imageView_ring=0x7f0c006a;
         public static final int info=0x7f0c0084;
-        public static final int input_email=0x7f0c0086;
+        public static final int input_email=0x7f0c008a;
         public static final int input_name=0x7f0c0074;
         public static final int input_password=0x7f0c0075;
         public static final int inside_imageview=0x7f0c0069;
@@ -2367,7 +2369,7 @@ containing a value of this type.
         public static final int left=0x7f0c0023;
         public static final int line1=0x7f0c007e;
         public static final int line3=0x7f0c0082;
-        public static final int link_login=0x7f0c0088;
+        public static final int link_login=0x7f0c008c;
         public static final int link_signup=0x7f0c0077;
         public static final int listMode=0x7f0c000b;
         public static final int list_item=0x7f0c0041;
@@ -2386,6 +2388,8 @@ containing a value of this type.
         public static final int progress_circular=0x7f0c0006;
         public static final int progress_horizontal=0x7f0c0007;
         public static final int radio=0x7f0c0054;
+        public static final int restaurantAddress=0x7f0c0087;
+        public static final int restaurantName=0x7f0c0086;
         public static final int right=0x7f0c0024;
         public static final int screen=0x7f0c0028;
         public static final int scroll=0x7f0c0018;
@@ -2491,11 +2495,12 @@ containing a value of this type.
         public static final int notification_template_media=0x7f04002c;
         public static final int notification_template_part_chronometer=0x7f04002d;
         public static final int notification_template_part_time=0x7f04002e;
-        public static final int select_dialog_item_material=0x7f04002f;
-        public static final int select_dialog_multichoice_material=0x7f040030;
-        public static final int select_dialog_singlechoice_material=0x7f040031;
-        public static final int signup=0x7f040032;
-        public static final int support_simple_spinner_dropdown_item=0x7f040033;
+        public static final int restaurant_viewer=0x7f04002f;
+        public static final int select_dialog_item_material=0x7f040030;
+        public static final int select_dialog_multichoice_material=0x7f040031;
+        public static final int select_dialog_singlechoice_material=0x7f040032;
+        public static final int signup=0x7f040033;
+        public static final int support_simple_spinner_dropdown_item=0x7f040034;
     }
     public static final class mipmap {
         public static final int ic_launcher=0x7f030000;

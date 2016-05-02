@@ -2,6 +2,7 @@ package cheesewheel.cheesewheel;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -44,8 +45,11 @@ public class Wheel extends AppCompatActivity {
     String loginUsername;
     ArrayList<String> rArray = new ArrayList<>();
 
-    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean"};
-
+    private static String[] cuisines = new String[]{"Chinese","Fast Food","Japanese","BBQ","Pizza","Deli","Italian","Thai","Mediterranean",
+            "Malaysian","Greek","Turkish","Moroccon","Chicken","Burgers","Bar Food","Mexican","Cafes","Seafood","Pizza","Sushi","Soul","Korean",
+            "Vietnamese","Asian","Pastries","French","German","Vegetarian","Vegan","Jewish","Chinese-Islamic","Chinese-Mexican","Tex-Mex","Steak",
+            "Hot Pot","Indian"
+    };
     private static Random rand = new Random();
 
     private static Map<String,Float> choices;
@@ -140,6 +144,7 @@ public class Wheel extends AppCompatActivity {
     Yelp yelp = new Yelp(apiKeys.getYelpConsumerKey(), apiKeys.getYelpConsumerSecret(), apiKeys.getYelpToken(), apiKeys.getYelpTokenSecret());
     String restaurantData = "chinese";
     String parsedYelpData;
+    int rIndex;
 
     ServerConnection server = new ServerConnection();
 
@@ -480,7 +485,7 @@ public class Wheel extends AppCompatActivity {
         protected  void onPreExecute() {
             super.onPreExecute();
             progressDialog.setIndeterminate(true);
-            progressDialog.setMessage("Determining Restaurants...");
+            progressDialog.setMessage("Determining Restaurant...");
             progressDialog.show();
             // Loading screen or something
         }
@@ -527,6 +532,7 @@ public class Wheel extends AppCompatActivity {
             String index = server.send(spaceDelimitedString);
             rArray = tempKeys;
             restaurantData = tempKeys.get(Integer.parseInt(index));
+            rIndex = Integer.parseInt(index);
             System.out.println("restaurant data: " + restaurantData);
             return null;
         }
@@ -535,9 +541,15 @@ public class Wheel extends AppCompatActivity {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             progressDialog.dismiss();
-
+            Intent intent = new Intent(getApplicationContext(), RestaurantViewer.class);
+            intent.putExtra("parsedYelpData", parsedYelpData);
+            intent.putExtra("restaurantData", restaurantData);
+            intent.putExtra("loginUsername", loginUsername);
+            intent.putExtra("rArray", rArray);
+            intent.putExtra("rIndex", rIndex);
+            startActivity(intent);
             // TODO Copy an's thing for choosing yes or no
-            // Send PARSEDYELPDATA, RESTAURANTDATA, LOGINUSERNAME, RESTAURANTNAME, RARRAY
+            // Send PARSEDYELPDATA, RESTAURANTDATA, LOGINUSERNAME, RARRAY
         }
     }
 }
