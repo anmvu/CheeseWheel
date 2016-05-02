@@ -11,7 +11,7 @@ public class ServerConnection{
     private URL url;
     public ServerConnection(){
         try{
-            url = new URL("http://172.16.18.59/cgi-bin/cgie22.cgi");
+            url = new URL("http://172.16.20.38/cgi-bin/cgie22.cgi");
         }
         catch(Exception e){
             System.out.println("Could not connect to server!");

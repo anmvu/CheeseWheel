@@ -1,10 +1,6 @@
 [
     {
-        "merged": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/build/intermediates/res/merged/debug/mipmap-mdpi-v4/ic_launcher.png",
-        "source": "/Users/xflyter/AndroidStudioProjects/CheeseWheel/app/src/main/res/mipmap-mdpi/ic_launcher.png"
-    },
-    {
-        "merged": "/Users/webteam/Documents/CheeseWheel/app/build/intermediates/res/merged/debug/mipmap-mdpi-v4/ic_launcher.png",
-        "source": "/Users/webteam/Documents/CheeseWheel/app/src/main/res/mipmap-mdpi/ic_launcher.png"
+        "merged": "C:\\Users\\Annie Vuvu\\Documents\\CheeseWheel\\app\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi-v4\\ic_launcher.png",
+        "source": "C:\\Users\\Annie Vuvu\\Documents\\CheeseWheel\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png"
     }
 ]
